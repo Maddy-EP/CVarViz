@@ -57,11 +57,10 @@
         </p>
       </article>
       <hr>
-      <div id="myapp">
-        <script>
-          var app = Elm.Main.init({ node: document.getElementById('myapp') });
-        </script>
-      </div>
+      <div id="myapp"></div>
+      <figure id="graph">
+        <figcaption><i>Points-to graph</i></figcaption>
+      </figure>
     </main>
     <footer>
       <hr>
@@ -69,5 +68,21 @@
         <small>me [at] maddyep.com</small>
       </p>
     </footer>
+    <script src="static/js/viz-standalone.js"></script>
+    <script>
+      var app = Elm.Main.init({ node: document.getElementById('myapp') });
+
+      app.ports.sendDot.subscribe(function(message) {
+          Viz.instance().then(function(viz) {
+              var fig = document.getElementById('graph');
+              var svg = viz.renderSVGElement(message);
+              if (fig.children.length == 1) {
+                  fig.insertBefore(svg, fig.firstChild);
+              } else {
+                  fig.replaceChild(svg, fig.firstChild);
+              }
+          });
+      });
+    </script>
   </body>
 </html>
