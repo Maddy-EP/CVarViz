@@ -1,4 +1,4 @@
-module C.Val exposing (Val(..), view)
+module C.Val exposing (Val(..), pretty, view)
 
 import Html exposing (..)
 import String
@@ -9,14 +9,19 @@ type Val
     | P (Maybe Int)
 
 
-view : Val -> Html msg
-view v =
+pretty : Val -> String
+pretty v =
     case v of
         I i ->
-            text <| String.fromInt i
+            String.fromInt i
 
         P Nothing ->
-            text "null"
+            "null"
 
         P (Just i) ->
-            text <| String.fromInt i
+            String.fromInt i
+
+
+view : Val -> Html msg
+view v =
+    text <| pretty v
