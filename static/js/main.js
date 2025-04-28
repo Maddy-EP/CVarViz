@@ -4500,6 +4500,43 @@ var _Parser_findSubString = F5(function(smallString, offset, row, col, bigString
 
 	return _Utils_Tuple3(newOffset, row, col);
 });
+
+
+
+var _Bitwise_and = F2(function(a, b)
+{
+	return a & b;
+});
+
+var _Bitwise_or = F2(function(a, b)
+{
+	return a | b;
+});
+
+var _Bitwise_xor = F2(function(a, b)
+{
+	return a ^ b;
+});
+
+function _Bitwise_complement(a)
+{
+	return ~a;
+};
+
+var _Bitwise_shiftLeftBy = F2(function(offset, a)
+{
+	return a << offset;
+});
+
+var _Bitwise_shiftRightBy = F2(function(offset, a)
+{
+	return a >> offset;
+});
+
+var _Bitwise_shiftRightZfBy = F2(function(offset, a)
+{
+	return a >>> offset;
+});
 var $elm$core$Basics$EQ = {$: 'EQ'};
 var $elm$core$Basics$GT = {$: 'GT'};
 var $elm$core$Basics$LT = {$: 'LT'};
@@ -6582,127 +6619,228 @@ var $author$project$C$Eval$elabDefStr = F2(
 					$author$project$C$Parse$parseDef(env),
 					s)));
 	});
-var $author$project$Main$update = F2(
-	function (msg, model) {
-		if (msg.$ === 'AddVar') {
-			return _Utils_Tuple2(
-				function () {
-					var _v1 = A2($author$project$C$Eval$elabDefStr, model.env, model.varString);
-					if (_v1.$ === 'Ok') {
-						var env_ = _v1.a;
-						return _Utils_update(
-							model,
-							{env: env_, error: '', varString: ''});
-					} else {
-						var e = _v1.a;
-						return _Utils_update(
-							model,
-							{error: e});
-					}
-				}(),
-				$elm$core$Platform$Cmd$none);
-		} else {
-			var newContent = msg.a;
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{varString: newContent}),
-				$elm$core$Platform$Cmd$none);
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $author$project$Main$sendDot = _Platform_outgoingPort('sendDot', $elm$json$Json$Encode$string);
+var $elm_community$graph$Graph$DOT$Styles = F4(
+	function (rankdir, graph, node, edge) {
+		return {edge: edge, graph: graph, node: node, rankdir: rankdir};
+	});
+var $elm_community$graph$Graph$DOT$TB = {$: 'TB'};
+var $elm_community$graph$Graph$DOT$defaultStyles = A4($elm_community$graph$Graph$DOT$Styles, $elm_community$graph$Graph$DOT$TB, '', '', '');
+var $elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
+	});
+var $elm_community$intdict$IntDict$foldl = F3(
+	function (f, acc, dict) {
+		foldl:
+		while (true) {
+			switch (dict.$) {
+				case 'Empty':
+					return acc;
+				case 'Leaf':
+					var l = dict.a;
+					return A3(f, l.key, l.value, acc);
+				default:
+					var i = dict.a;
+					var $temp$f = f,
+						$temp$acc = A3($elm_community$intdict$IntDict$foldl, f, acc, i.left),
+						$temp$dict = i.right;
+					f = $temp$f;
+					acc = $temp$acc;
+					dict = $temp$dict;
+					continue foldl;
+			}
 		}
 	});
-var $author$project$Main$AddVar = {$: 'AddVar'};
-var $author$project$Main$ChangeCVarInput = function (a) {
-	return {$: 'ChangeCVarInput', a: a};
+var $elm_community$graph$Graph$unGraph = function (graph) {
+	var rep = graph.a;
+	return rep;
 };
-var $elm$html$Html$article = _VirtualDom_node('article');
-var $elm$html$Html$aside = _VirtualDom_node('aside');
-var $elm$html$Html$button = _VirtualDom_node('button');
-var $elm$html$Html$details = _VirtualDom_node('details');
-var $elm$html$Html$h2 = _VirtualDom_node('h2');
-var $elm$json$Json$Encode$string = _Json_wrap;
-var $elm$html$Html$Attributes$stringProperty = F2(
-	function (key, string) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$string(string));
-	});
-var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
-var $elm$html$Html$input = _VirtualDom_node('input');
-var $elm$html$Html$label = _VirtualDom_node('label');
-var $elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 'Normal', a: a};
+var $elm_community$graph$Graph$edges = function (graph) {
+	var flippedFoldl = F3(
+		function (f, dict, list) {
+			return A3($elm_community$intdict$IntDict$foldl, f, list, dict);
+		});
+	var prependEdges = F2(
+		function (node1, ctx) {
+			return A2(
+				flippedFoldl,
+				F2(
+					function (node2, e) {
+						return $elm$core$List$cons(
+							{from: node1, label: e, to: node2});
+					}),
+				ctx.outgoing);
+		});
+	return A3(
+		flippedFoldl,
+		prependEdges,
+		$elm_community$graph$Graph$unGraph(graph),
+		_List_Nil);
 };
-var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
-var $elm$html$Html$Events$on = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$Normal(decoder));
-	});
-var $elm$html$Html$Events$onClick = function (msg) {
-	return A2(
-		$elm$html$Html$Events$on,
-		'click',
-		$elm$json$Json$Decode$succeed(msg));
-};
-var $elm$html$Html$Events$alwaysStop = function (x) {
-	return _Utils_Tuple2(x, true);
-};
-var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
-	return {$: 'MayStopPropagation', a: a};
-};
-var $elm$html$Html$Events$stopPropagationOn = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
-	});
-var $elm$json$Json$Decode$field = _Json_decodeField;
-var $elm$json$Json$Decode$at = F2(
-	function (fields, decoder) {
-		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
-	});
-var $elm$json$Json$Decode$string = _Json_decodeString;
-var $elm$html$Html$Events$targetValue = A2(
-	$elm$json$Json$Decode$at,
-	_List_fromArray(
-		['target', 'value']),
-	$elm$json$Json$Decode$string);
-var $elm$html$Html$Events$onInput = function (tagger) {
-	return A2(
-		$elm$html$Html$Events$stopPropagationOn,
-		'input',
-		A2(
-			$elm$json$Json$Decode$map,
-			$elm$html$Html$Events$alwaysStop,
-			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
-};
-var $elm$html$Html$p = _VirtualDom_node('p');
-var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
-var $elm$html$Html$summary = _VirtualDom_node('summary');
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
-var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
-var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
-var $elm$json$Json$Encode$bool = _Json_wrap;
-var $elm$html$Html$Attributes$boolProperty = F2(
-	function (key, bool) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$bool(bool));
-	});
-var $elm$html$Html$Attributes$hidden = $elm$html$Html$Attributes$boolProperty('hidden');
-var $elm$core$List$isEmpty = function (xs) {
-	if (!xs.b) {
+var $elm$core$Dict$isEmpty = function (dict) {
+	if (dict.$ === 'RBEmpty_elm_builtin') {
 		return true;
 	} else {
 		return false;
 	}
 };
+var $elm_community$intdict$IntDict$foldr = F3(
+	function (f, acc, dict) {
+		foldr:
+		while (true) {
+			switch (dict.$) {
+				case 'Empty':
+					return acc;
+				case 'Leaf':
+					var l = dict.a;
+					return A3(f, l.key, l.value, acc);
+				default:
+					var i = dict.a;
+					var $temp$f = f,
+						$temp$acc = A3($elm_community$intdict$IntDict$foldr, f, acc, i.right),
+						$temp$dict = i.left;
+					f = $temp$f;
+					acc = $temp$acc;
+					dict = $temp$dict;
+					continue foldr;
+			}
+		}
+	});
+var $elm_community$intdict$IntDict$values = function (dict) {
+	return A3(
+		$elm_community$intdict$IntDict$foldr,
+		F3(
+			function (_v0, value, valueList) {
+				return A2($elm$core$List$cons, value, valueList);
+			}),
+		_List_Nil,
+		dict);
+};
+var $elm_community$graph$Graph$nodes = A2(
+	$elm$core$Basics$composeR,
+	$elm_community$graph$Graph$unGraph,
+	A2(
+		$elm$core$Basics$composeR,
+		$elm_community$intdict$IntDict$values,
+		$elm$core$List$map(
+			function ($) {
+				return $.node;
+			})));
+var $elm$core$List$sortWith = _List_sortWith;
+var $elm_community$graph$Graph$DOT$outputWithStylesAndAttributes = F4(
+	function (styles, nodeAttrs, edgeAttrs, graph) {
+		var rankDirToString = function (r) {
+			switch (r.$) {
+				case 'TB':
+					return 'TB';
+				case 'LR':
+					return 'LR';
+				case 'BT':
+					return 'BT';
+				default:
+					return 'RL';
+			}
+		};
+		var nodes = $elm_community$graph$Graph$nodes(graph);
+		var encode = A2(
+			$elm$core$Basics$composeR,
+			$elm$json$Json$Encode$string,
+			$elm$json$Json$Encode$encode(0));
+		var edges = function () {
+			var compareEdge = F2(
+				function (a, b) {
+					var _v1 = A2($elm$core$Basics$compare, a.from, b.from);
+					switch (_v1.$) {
+						case 'LT':
+							return $elm$core$Basics$LT;
+						case 'GT':
+							return $elm$core$Basics$GT;
+						default:
+							return A2($elm$core$Basics$compare, a.to, b.to);
+					}
+				});
+			return A2(
+				$elm$core$List$sortWith,
+				compareEdge,
+				$elm_community$graph$Graph$edges(graph));
+		}();
+		var attrAssocs = A2(
+			$elm$core$Basics$composeR,
+			$elm$core$Dict$toList,
+			A2(
+				$elm$core$Basics$composeR,
+				$elm$core$List$map(
+					function (_v0) {
+						var k = _v0.a;
+						var v = _v0.b;
+						return k + ('=' + encode(v));
+					}),
+				$elm$core$String$join(', ')));
+		var makeAttrs = function (d) {
+			return $elm$core$Dict$isEmpty(d) ? '' : (' [' + (attrAssocs(d) + ']'));
+		};
+		var edge = function (e) {
+			return '  ' + ($elm$core$String$fromInt(e.from) + (' -> ' + ($elm$core$String$fromInt(e.to) + makeAttrs(
+				edgeAttrs(e.label)))));
+		};
+		var edgesString = A2(
+			$elm$core$String$join,
+			'\n',
+			A2($elm$core$List$map, edge, edges));
+		var node = function (n) {
+			return '  ' + ($elm$core$String$fromInt(n.id) + makeAttrs(
+				nodeAttrs(n.label)));
+		};
+		var nodesString = A2(
+			$elm$core$String$join,
+			'\n',
+			A2($elm$core$List$map, node, nodes));
+		return A2(
+			$elm$core$String$join,
+			'\n',
+			_List_fromArray(
+				[
+					'digraph G {',
+					'  rankdir=' + rankDirToString(styles.rankdir),
+					'  graph [' + (styles.graph + ']'),
+					'  node [' + (styles.node + ']'),
+					'  edge [' + (styles.edge + ']'),
+					'',
+					edgesString,
+					'',
+					nodesString,
+					'}'
+				]));
+	});
+var $elm$core$Dict$singleton = F2(
+	function (key, value) {
+		return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
+	});
+var $elm_community$graph$Graph$DOT$outputWithStyles = F4(
+	function (styles, mapNode, mapEdge, graph) {
+		var labelOnly = function (maybeLabel) {
+			if (maybeLabel.$ === 'Nothing') {
+				return $elm$core$Dict$empty;
+			} else {
+				var l = maybeLabel.a;
+				return A2($elm$core$Dict$singleton, 'label', l);
+			}
+		};
+		return A4(
+			$elm_community$graph$Graph$DOT$outputWithStylesAndAttributes,
+			styles,
+			A2($elm$core$Basics$composeL, labelOnly, mapNode),
+			A2($elm$core$Basics$composeL, labelOnly, mapEdge),
+			graph);
+	});
+var $elm_community$graph$Graph$DOT$output = $elm_community$graph$Graph$DOT$outputWithStyles($elm_community$graph$Graph$DOT$defaultStyles);
+var $elm_community$graph$Graph$Edge = F3(
+	function (from, to, label) {
+		return {from: from, label: label, to: to};
+	});
 var $elm$core$Dict$foldl = F3(
 	function (func, acc, dict) {
 		foldl:
@@ -6789,6 +6927,484 @@ var $elm$core$Dict$merge = F6(
 			intermediateResult,
 			leftovers);
 	});
+var $elm$core$Result$withDefault = F2(
+	function (def, result) {
+		if (result.$ === 'Ok') {
+			var a = result.a;
+			return a;
+		} else {
+			return def;
+		}
+	});
+var $author$project$C$Env$envEdges = function (env) {
+	return A6(
+		$elm$core$Dict$merge,
+		F3(
+			function (_v0, _v1, rs) {
+				return rs;
+			}),
+		F4(
+			function (n, t, a, rs) {
+				if (t.$ === 'IntT') {
+					return rs;
+				} else {
+					var _v3 = A2(
+						$elm$core$Result$withDefault,
+						$author$project$C$Val$P($elm$core$Maybe$Nothing),
+						A2($author$project$C$Env$lookupValue, env, n));
+					if (_v3.$ === 'P') {
+						if (_v3.a.$ === 'Nothing') {
+							var _v4 = _v3.a;
+							return rs;
+						} else {
+							var i = _v3.a.a;
+							return A2(
+								$elm$core$List$cons,
+								A3($elm_community$graph$Graph$Edge, a, i, ''),
+								rs);
+						}
+					} else {
+						return rs;
+					}
+				}
+			}),
+		F3(
+			function (_v5, _v6, rs) {
+				return rs;
+			}),
+		env.types,
+		env.addrs,
+		_List_Nil);
+};
+var $elm_community$graph$Graph$Node = F2(
+	function (id, label) {
+		return {id: id, label: label};
+	});
+var $author$project$C$Val$pretty = function (v) {
+	if (v.$ === 'I') {
+		var i = v.a;
+		return $elm$core$String$fromInt(i);
+	} else {
+		if (v.a.$ === 'Nothing') {
+			var _v1 = v.a;
+			return 'null';
+		} else {
+			var i = v.a.a;
+			return $elm$core$String$fromInt(i);
+		}
+	}
+};
+var $author$project$C$Env$envNodes = function (env) {
+	return A6(
+		$elm$core$Dict$merge,
+		F3(
+			function (_v0, _v1, rs) {
+				return rs;
+			}),
+		F4(
+			function (n, t, a, rs) {
+				return A2(
+					$elm$core$List$cons,
+					A2(
+						$elm_community$graph$Graph$Node,
+						a,
+						'Addr ' + ($elm$core$String$fromInt(a) + (': ' + (n + ('[ ' + ($author$project$C$Type$pretty(t) + (' ]' + (' = ' + A2(
+							$elm$core$Result$withDefault,
+							'???',
+							A2(
+								$elm$core$Result$andThen,
+								function (v) {
+									return $elm$core$Result$Ok(
+										$author$project$C$Val$pretty(v));
+								},
+								A2($author$project$C$Env$lookupValue, env, n))))))))))),
+					rs);
+			}),
+		F3(
+			function (_v2, _v3, rs) {
+				return rs;
+			}),
+		env.types,
+		env.addrs,
+		_List_Nil);
+};
+var $elm_community$graph$Graph$Graph = function (a) {
+	return {$: 'Graph', a: a};
+};
+var $elm_community$graph$Graph$NodeContext = F3(
+	function (node, incoming, outgoing) {
+		return {incoming: incoming, node: node, outgoing: outgoing};
+	});
+var $elm_community$intdict$IntDict$Empty = {$: 'Empty'};
+var $elm_community$intdict$IntDict$empty = $elm_community$intdict$IntDict$Empty;
+var $elm_community$intdict$IntDict$Inner = function (a) {
+	return {$: 'Inner', a: a};
+};
+var $elm_community$intdict$IntDict$size = function (dict) {
+	switch (dict.$) {
+		case 'Empty':
+			return 0;
+		case 'Leaf':
+			return 1;
+		default:
+			var i = dict.a;
+			return i.size;
+	}
+};
+var $elm_community$intdict$IntDict$inner = F3(
+	function (p, l, r) {
+		var _v0 = _Utils_Tuple2(l, r);
+		if (_v0.a.$ === 'Empty') {
+			var _v1 = _v0.a;
+			return r;
+		} else {
+			if (_v0.b.$ === 'Empty') {
+				var _v2 = _v0.b;
+				return l;
+			} else {
+				return $elm_community$intdict$IntDict$Inner(
+					{
+						left: l,
+						prefix: p,
+						right: r,
+						size: $elm_community$intdict$IntDict$size(l) + $elm_community$intdict$IntDict$size(r)
+					});
+			}
+		}
+	});
+var $elm$core$Bitwise$and = _Bitwise_and;
+var $elm$core$Bitwise$complement = _Bitwise_complement;
+var $elm$core$Bitwise$or = _Bitwise_or;
+var $elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
+var $elm_community$intdict$IntDict$highestBitSet = function (n) {
+	var shiftOr = F2(
+		function (i, shift) {
+			return i | (i >>> shift);
+		});
+	var n1 = A2(shiftOr, n, 1);
+	var n2 = A2(shiftOr, n1, 2);
+	var n3 = A2(shiftOr, n2, 4);
+	var n4 = A2(shiftOr, n3, 8);
+	var n5 = A2(shiftOr, n4, 16);
+	return n5 & (~(n5 >>> 1));
+};
+var $elm_community$intdict$IntDict$signBit = $elm_community$intdict$IntDict$highestBitSet(-1);
+var $elm$core$Bitwise$xor = _Bitwise_xor;
+var $elm_community$intdict$IntDict$isBranchingBitSet = F2(
+	function (p, i) {
+		return !(!(p.branchingBit & ($elm_community$intdict$IntDict$signBit ^ i)));
+	});
+var $elm_community$intdict$IntDict$higherBitMask = function (branchingBit) {
+	return branchingBit ^ (~(branchingBit - 1));
+};
+var $elm_community$intdict$IntDict$lcp = F2(
+	function (x, y) {
+		var branchingBit = $elm_community$intdict$IntDict$highestBitSet(x ^ y);
+		var mask = $elm_community$intdict$IntDict$higherBitMask(branchingBit);
+		var prefixBits = x & mask;
+		return {branchingBit: branchingBit, prefixBits: prefixBits};
+	});
+var $elm_community$intdict$IntDict$Leaf = function (a) {
+	return {$: 'Leaf', a: a};
+};
+var $elm_community$intdict$IntDict$leaf = F2(
+	function (k, v) {
+		return $elm_community$intdict$IntDict$Leaf(
+			{key: k, value: v});
+	});
+var $elm_community$intdict$IntDict$prefixMatches = F2(
+	function (p, n) {
+		return !((n & $elm_community$intdict$IntDict$higherBitMask(p.branchingBit)) - p.prefixBits);
+	});
+var $elm_community$intdict$IntDict$update = F3(
+	function (key, alter, dict) {
+		var join = F2(
+			function (_v2, _v3) {
+				var k1 = _v2.a;
+				var l = _v2.b;
+				var k2 = _v3.a;
+				var r = _v3.b;
+				var prefix = A2($elm_community$intdict$IntDict$lcp, k1, k2);
+				return A2($elm_community$intdict$IntDict$isBranchingBitSet, prefix, k2) ? A3($elm_community$intdict$IntDict$inner, prefix, l, r) : A3($elm_community$intdict$IntDict$inner, prefix, r, l);
+			});
+		var alteredNode = function (mv) {
+			var _v1 = alter(mv);
+			if (_v1.$ === 'Just') {
+				var v = _v1.a;
+				return A2($elm_community$intdict$IntDict$leaf, key, v);
+			} else {
+				return $elm_community$intdict$IntDict$empty;
+			}
+		};
+		switch (dict.$) {
+			case 'Empty':
+				return alteredNode($elm$core$Maybe$Nothing);
+			case 'Leaf':
+				var l = dict.a;
+				return (!(l.key - key)) ? alteredNode(
+					$elm$core$Maybe$Just(l.value)) : A2(
+					join,
+					_Utils_Tuple2(
+						key,
+						alteredNode($elm$core$Maybe$Nothing)),
+					_Utils_Tuple2(l.key, dict));
+			default:
+				var i = dict.a;
+				return A2($elm_community$intdict$IntDict$prefixMatches, i.prefix, key) ? (A2($elm_community$intdict$IntDict$isBranchingBitSet, i.prefix, key) ? A3(
+					$elm_community$intdict$IntDict$inner,
+					i.prefix,
+					i.left,
+					A3($elm_community$intdict$IntDict$update, key, alter, i.right)) : A3(
+					$elm_community$intdict$IntDict$inner,
+					i.prefix,
+					A3($elm_community$intdict$IntDict$update, key, alter, i.left),
+					i.right)) : A2(
+					join,
+					_Utils_Tuple2(
+						key,
+						alteredNode($elm$core$Maybe$Nothing)),
+					_Utils_Tuple2(i.prefix.prefixBits, dict));
+		}
+	});
+var $elm_community$intdict$IntDict$insert = F3(
+	function (key, value, dict) {
+		return A3(
+			$elm_community$intdict$IntDict$update,
+			key,
+			$elm$core$Basics$always(
+				$elm$core$Maybe$Just(value)),
+			dict);
+	});
+var $elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return $elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $elm_community$intdict$IntDict$get = F2(
+	function (key, dict) {
+		get:
+		while (true) {
+			switch (dict.$) {
+				case 'Empty':
+					return $elm$core$Maybe$Nothing;
+				case 'Leaf':
+					var l = dict.a;
+					return (!(l.key - key)) ? $elm$core$Maybe$Just(l.value) : $elm$core$Maybe$Nothing;
+				default:
+					var i = dict.a;
+					if (!A2($elm_community$intdict$IntDict$prefixMatches, i.prefix, key)) {
+						return $elm$core$Maybe$Nothing;
+					} else {
+						if (A2($elm_community$intdict$IntDict$isBranchingBitSet, i.prefix, key)) {
+							var $temp$key = key,
+								$temp$dict = i.right;
+							key = $temp$key;
+							dict = $temp$dict;
+							continue get;
+						} else {
+							var $temp$key = key,
+								$temp$dict = i.left;
+							key = $temp$key;
+							dict = $temp$dict;
+							continue get;
+						}
+					}
+			}
+		}
+	});
+var $elm_community$intdict$IntDict$member = F2(
+	function (key, dict) {
+		var _v0 = A2($elm_community$intdict$IntDict$get, key, dict);
+		if (_v0.$ === 'Just') {
+			return true;
+		} else {
+			return false;
+		}
+	});
+var $elm_community$graph$Graph$fromNodesAndEdges = F2(
+	function (nodes_, edges_) {
+		var nodeRep = A3(
+			$elm$core$List$foldl,
+			function (n) {
+				return A2(
+					$elm_community$intdict$IntDict$insert,
+					n.id,
+					A3($elm_community$graph$Graph$NodeContext, n, $elm_community$intdict$IntDict$empty, $elm_community$intdict$IntDict$empty));
+			},
+			$elm_community$intdict$IntDict$empty,
+			nodes_);
+		var addEdge = F2(
+			function (edge, rep) {
+				var updateOutgoing = function (ctx) {
+					return _Utils_update(
+						ctx,
+						{
+							outgoing: A3($elm_community$intdict$IntDict$insert, edge.to, edge.label, ctx.outgoing)
+						});
+				};
+				var updateIncoming = function (ctx) {
+					return _Utils_update(
+						ctx,
+						{
+							incoming: A3($elm_community$intdict$IntDict$insert, edge.from, edge.label, ctx.incoming)
+						});
+				};
+				return A3(
+					$elm_community$intdict$IntDict$update,
+					edge.to,
+					$elm$core$Maybe$map(updateIncoming),
+					A3(
+						$elm_community$intdict$IntDict$update,
+						edge.from,
+						$elm$core$Maybe$map(updateOutgoing),
+						rep));
+			});
+		var addEdgeIfValid = F2(
+			function (edge, rep) {
+				return (A2($elm_community$intdict$IntDict$member, edge.from, rep) && A2($elm_community$intdict$IntDict$member, edge.to, rep)) ? A2(addEdge, edge, rep) : rep;
+			});
+		return $elm_community$graph$Graph$Graph(
+			A3($elm$core$List$foldl, addEdgeIfValid, nodeRep, edges_));
+	});
+var $author$project$C$Env$toGraph = function (env) {
+	return A2(
+		$elm_community$graph$Graph$fromNodesAndEdges,
+		$author$project$C$Env$envNodes(env),
+		$author$project$C$Env$envEdges(env));
+};
+var $author$project$C$Env$toGraphDot = function (env) {
+	return A3(
+		$elm_community$graph$Graph$DOT$output,
+		$elm$core$Maybe$Just,
+		$elm$core$Maybe$Just,
+		$author$project$C$Env$toGraph(env));
+};
+var $author$project$Main$update = F2(
+	function (msg, model) {
+		if (msg.$ === 'AddVar') {
+			var res = A2($author$project$C$Eval$elabDefStr, model.env, model.varString);
+			if (res.$ === 'Ok') {
+				var env_ = res.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{env: env_, error: '', varString: ''}),
+					$author$project$Main$sendDot(
+						$author$project$C$Env$toGraphDot(env_)));
+			} else {
+				var e = res.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{error: e}),
+					$elm$core$Platform$Cmd$none);
+			}
+		} else {
+			var newContent = msg.a;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{varString: newContent}),
+				$elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$Main$AddVar = {$: 'AddVar'};
+var $author$project$Main$ChangeCVarInput = function (a) {
+	return {$: 'ChangeCVarInput', a: a};
+};
+var $elm$html$Html$article = _VirtualDom_node('article');
+var $elm$html$Html$aside = _VirtualDom_node('aside');
+var $elm$html$Html$button = _VirtualDom_node('button');
+var $elm$html$Html$details = _VirtualDom_node('details');
+var $elm$html$Html$h2 = _VirtualDom_node('h2');
+var $elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$string(string));
+	});
+var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
+var $elm$html$Html$input = _VirtualDom_node('input');
+var $elm$html$Html$label = _VirtualDom_node('label');
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'click',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $elm$html$Html$Events$alwaysStop = function (x) {
+	return _Utils_Tuple2(x, true);
+};
+var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
+	return {$: 'MayStopPropagation', a: a};
+};
+var $elm$html$Html$Events$stopPropagationOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+	});
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $elm$html$Html$Events$targetValue = A2(
+	$elm$json$Json$Decode$at,
+	_List_fromArray(
+		['target', 'value']),
+	$elm$json$Json$Decode$string);
+var $elm$html$Html$Events$onInput = function (tagger) {
+	return A2(
+		$elm$html$Html$Events$stopPropagationOn,
+		'input',
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$html$Html$Events$alwaysStop,
+			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
+};
+var $elm$html$Html$p = _VirtualDom_node('p');
+var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
+var $elm$html$Html$summary = _VirtualDom_node('summary');
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
+var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $elm$html$Html$Attributes$boolProperty = F2(
+	function (key, bool) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$bool(bool));
+	});
+var $elm$html$Html$Attributes$hidden = $elm$html$Html$Attributes$boolProperty('hidden');
+var $elm$core$List$isEmpty = function (xs) {
+	if (!xs.b) {
+		return true;
+	} else {
+		return false;
+	}
+};
 var $elm$html$Html$table = _VirtualDom_node('table');
 var $elm$html$Html$td = _VirtualDom_node('td');
 var $elm$html$Html$th = _VirtualDom_node('th');
@@ -6799,30 +7415,9 @@ var $author$project$C$Type$view = function (t) {
 		$author$project$C$Type$pretty(t));
 };
 var $author$project$C$Val$view = function (v) {
-	if (v.$ === 'I') {
-		var i = v.a;
-		return $elm$html$Html$text(
-			$elm$core$String$fromInt(i));
-	} else {
-		if (v.a.$ === 'Nothing') {
-			var _v1 = v.a;
-			return $elm$html$Html$text('null');
-		} else {
-			var i = v.a.a;
-			return $elm$html$Html$text(
-				$elm$core$String$fromInt(i));
-		}
-	}
+	return $elm$html$Html$text(
+		$author$project$C$Val$pretty(v));
 };
-var $elm$core$Result$withDefault = F2(
-	function (def, result) {
-		if (result.$ === 'Ok') {
-			var a = result.a;
-			return a;
-		} else {
-			return def;
-		}
-	});
 var $author$project$C$Env$view = function (env) {
 	var rows = $elm$core$List$reverse(
 		A6(
