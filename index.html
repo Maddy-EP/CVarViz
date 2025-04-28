@@ -1,0 +1,73 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <link rel="stylesheet" href="static/css/mvp.css">
+
+    <meta charset="UTF-8">
+    <meta name="description" content="A simple tool to visualize C variables.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CVarViz</title>
+    <script src="static/js/main.js"></script>
+  </head>
+
+  <body>
+    <header>
+      <h1>CVarViz</h1>
+      <p>Visualize C <mark>variables</mark> and their <mark>pointer relationships</mark>.</p>
+      <br>
+      <p><a href="#app"><b>Try It! &rarr;</b></a></p>
+    </header>
+    <main>
+      <hr>
+      <article>
+        <h2>Getting Started</h2>
+        <p>
+          This tool helps you visualize what is going on at a snapshot in time
+          in a C program -- specifically in terms of the defined variables, and
+          how they relate to one another via pointers.
+        </p>
+        <p>
+          Currently, there is only support for <code>int</code> definitions, and
+          arbitrarily-indirect pointers to the same (e.g.
+          <code>int *</code>, <code>int **</code>, etc.)
+        </p>
+        <p>
+          The following can be used to define new variables:
+        </p>
+        <ul>
+          <li>Integer literals (when defining <code>int</code> values)</li>
+          <li><code>null</code> (when defining pointer values)</li>
+          <li>Previously-defined variables</li>
+          <li>Address-of operations (e.g. <code>&x</code>)</li>
+          <li>Dereference operations (e.g. <code>*x</code>)</li>
+        </ul>
+        <h2>Limitations</h2>
+        <p>
+          The tool is severely limited for the time being; only <code>int</code>
+          and its derived pointer types are supported, there are no dynamic
+          analyses to visualize how the points-to graph changes over time in a
+          real program, and you have to input your definitions / updates one at
+          a time.
+        </p>
+        <p>
+          Ultimately, I would love for this to allow "stepping through" simple C
+          programs so the points-to graph can be updated to show memory behavior
+          over time (this can help demystify tricky functions that do a
+          significant amount of pointer arithmetic / memory management).
+        </p>
+      </article>
+      <hr>
+      <div id="myapp">
+        <script>
+          var app = Elm.Main.init({ node: document.getElementById('myapp') });
+        </script>
+      </div>
+    </main>
+    <footer>
+      <hr>
+      <p>
+        <small>me [at] maddyep.com</small>
+      </p>
+    </footer>
+  </body>
+</html>
