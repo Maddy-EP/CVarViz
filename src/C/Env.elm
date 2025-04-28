@@ -1,8 +1,10 @@
-module C.Env exposing (Env, emptyEnv, insert, lookupAddr, lookupType, lookupValue, view)
+module C.Env exposing (Env, emptyEnv, insert, lookupAddr, lookupType, lookupValue, toGraphDot, view)
 
 import C.Type exposing (Type)
 import C.Val exposing (Val)
 import Dict as D exposing (Dict)
+import Graph as G exposing (Edge, Graph, Node)
+import Graph.DOT as GDOT
 import Html exposing (..)
 import Html.Attributes exposing (hidden)
 import List as L
@@ -16,6 +18,66 @@ type alias Env =
     , store : Dict Int Val
     , nextAddr : Int
     }
+
+
+envNodes : Env -> List (Node String)
+envNodes env =
+    D.merge
+        (\_ _ rs -> rs)
+        (\n t a rs ->
+            Node a
+                ("Addr "
+                    ++ S.fromInt a
+                    ++ ": "
+                    ++ n
+                    ++ "[ "
+                    ++ C.Type.pretty t
+                    ++ " ]"
+                    ++ " = "
+                    ++ R.withDefault "???" (lookupValue env n |> R.andThen (\v -> Ok <| C.Val.pretty v))
+                )
+                :: rs
+        )
+        (\_ _ rs -> rs)
+        env.types
+        env.addrs
+        []
+
+
+envEdges : Env -> List (Edge String)
+envEdges env =
+    D.merge
+        (\_ _ rs -> rs)
+        (\n t a rs ->
+            case t of
+                C.Type.IntT ->
+                    rs
+
+                C.Type.PointerT _ ->
+                    case R.withDefault (C.Val.P Nothing) (lookupValue env n) of
+                        C.Val.P Nothing ->
+                            rs
+
+                        C.Val.P (Just i) ->
+                            Edge a i "" :: rs
+
+                        C.Val.I _ ->
+                            rs
+        )
+        (\_ _ rs -> rs)
+        env.types
+        env.addrs
+        []
+
+
+toGraph : Env -> Graph String String
+toGraph env =
+    G.fromNodesAndEdges (envNodes env) (envEdges env)
+
+
+toGraphDot : Env -> String
+toGraphDot env =
+    GDOT.output Just Just (toGraph env)
 
 
 emptyEnv : Env
@@ -75,7 +137,15 @@ view env =
             L.reverse <|
                 D.merge
                     (\_ _ rs -> rs)
-                    (\n t a rs -> tr [] [ td [] [ text n ], td [] [ text <| S.fromInt a ], td [] <| [ C.Type.view t ], td [] [ R.withDefault (text "???") (lookupValue env n |> R.andThen (\v -> Ok <| C.Val.view v)) ] ] :: rs)
+                    (\n t a rs ->
+                        tr []
+                            [ td [] [ text n ]
+                            , td [] [ text <| S.fromInt a ]
+                            , td [] <| [ C.Type.view t ]
+                            , td [] [ R.withDefault (text "???") (lookupValue env n |> R.andThen (\v -> Ok <| C.Val.view v)) ]
+                            ]
+                            :: rs
+                    )
                     (\_ _ rs -> rs)
                     env.types
                     env.addrs
