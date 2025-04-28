@@ -1,4 +1,4 @@
-module Main exposing (init, main)
+port module Main exposing (init, main)
 
 import Browser
 import C.Env as CE exposing (Env)
@@ -19,6 +19,13 @@ main =
         , subscriptions = subscriptions
         , view = view
         }
+
+
+
+-- PORTS
+
+
+port sendDot : String -> Cmd msg
 
 
 
@@ -50,14 +57,16 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         AddVar ->
-            ( case CEv.elabDefStr model.env model.varString of
+            let
+                res =
+                    CEv.elabDefStr model.env model.varString
+            in
+            case res of
                 Ok env_ ->
-                    { model | env = env_, varString = "", error = "" }
+                    ( { model | env = env_, varString = "", error = "" }, sendDot <| CE.toGraphDot env_ )
 
                 Err e ->
-                    { model | error = e }
-            , Cmd.none
-            )
+                    ( { model | error = e }, Cmd.none )
 
         ChangeCVarInput newContent ->
             ( { model | varString = newContent }, Cmd.none )
