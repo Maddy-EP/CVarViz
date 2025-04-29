@@ -6339,11 +6339,8 @@ var $author$project$C$Parse$parseDef = A2(
 			$elm$parser$Parser$spaces)),
 	A2(
 		$elm$parser$Parser$ignorer,
-		A2(
-			$elm$parser$Parser$ignorer,
-			A2($elm$parser$Parser$ignorer, $author$project$C$Parse$parseExp, $elm$parser$Parser$spaces),
-			$elm$parser$Parser$symbol(';')),
-		$elm$parser$Parser$spaces));
+		A2($elm$parser$Parser$ignorer, $author$project$C$Parse$parseExp, $elm$parser$Parser$spaces),
+		$elm$parser$Parser$symbol(';')));
 var $author$project$C$Stmt$Assign = F2(
 	function (a, b) {
 		return {$: 'Assign', a: a, b: b};
@@ -6393,7 +6390,10 @@ var $author$project$C$Parse$parseStmt = A2(
 				A2($elm$parser$Parser$ignorer, $author$project$C$Parse$parseLValue, $elm$parser$Parser$spaces),
 				$elm$parser$Parser$symbol('=')),
 			$elm$parser$Parser$spaces)),
-	$author$project$C$Parse$parseExp);
+	A2(
+		$elm$parser$Parser$ignorer,
+		A2($elm$parser$Parser$ignorer, $author$project$C$Parse$parseExp, $elm$parser$Parser$spaces),
+		$elm$parser$Parser$symbol(';')));
 var $author$project$C$Parse$parseCommand = A2(
 	$elm$parser$Parser$keeper,
 	A2(
