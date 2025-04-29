@@ -1,8 +1,10 @@
-module C.Parse exposing (parseDef)
+module C.Parse exposing (parseCommand)
 
+import C.Command exposing (Command(..))
 import C.Def exposing (Def)
 import C.Env exposing (Env)
 import C.Exp exposing (Exp(..))
+import C.Stmt exposing (LValue(..), Stmt(..))
 import C.Type exposing (Type(..))
 import Char as C
 import Parser exposing (..)
@@ -35,25 +37,22 @@ parseVarName =
         }
 
 
-parseDef : Env -> Parser Def
-parseDef env =
+parseDef : Parser Def
+parseDef =
     succeed Def
-        |. spaces
         |= parseType
         |. spaces
         |= parseVarName
         |. spaces
         |. symbol "="
         |. spaces
-        |= parseExp env
+        |= parseExp
         |. spaces
         |. symbol ";"
-        |. spaces
-        |. end
 
 
-parseExp : Env -> Parser Exp
-parseExp env =
+parseExp : Parser Exp
+parseExp =
     oneOf
         [ map Lit int
         , map (always Null) (keyword "null")
@@ -62,7 +61,41 @@ parseExp env =
             |= parseVarName
         , succeed Deref
             |. symbol "*"
-            |= lazy (\_ -> parseExp env)
+            |= lazy (\_ -> parseExp)
         , succeed Var
             |= parseVarName
         ]
+
+
+parseLValue : Parser LValue
+parseLValue =
+    oneOf
+        [ succeed LDeref
+            |. symbol "*"
+            |= lazy (\_ -> parseLValue)
+        , succeed LVar
+            |= parseVarName
+        ]
+
+
+parseStmt : Parser Stmt
+parseStmt =
+    succeed Assign
+        |= parseLValue
+        |. spaces
+        |. symbol "="
+        |. spaces
+        |= parseExp
+        |. spaces
+        |. symbol ";"
+
+
+parseCommand : Parser Command
+parseCommand =
+    succeed identity
+        |. spaces
+        |= oneOf
+            [ map CDef parseDef
+            , map CStmt parseStmt
+            ]
+        |. end

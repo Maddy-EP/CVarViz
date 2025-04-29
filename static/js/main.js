@@ -5426,359 +5426,6 @@ var $author$project$Parser$Extra$deadEndsToString = function (deadEnds) {
 			'; ',
 			A2($elm$core$List$map, $author$project$Parser$Extra$deadEndToString, deadEnds)));
 };
-var $author$project$C$Val$I = function (a) {
-	return {$: 'I', a: a};
-};
-var $author$project$C$Val$P = function (a) {
-	return {$: 'P', a: a};
-};
-var $elm$core$Basics$composeL = F3(
-	function (g, f, x) {
-		return g(
-			f(x));
-	});
-var $elm$core$Result$fromMaybe = F2(
-	function (err, maybe) {
-		if (maybe.$ === 'Just') {
-			var v = maybe.a;
-			return $elm$core$Result$Ok(v);
-		} else {
-			return $elm$core$Result$Err(err);
-		}
-	});
-var $elm$core$Basics$compare = _Utils_compare;
-var $elm$core$Dict$get = F2(
-	function (targetKey, dict) {
-		get:
-		while (true) {
-			if (dict.$ === 'RBEmpty_elm_builtin') {
-				return $elm$core$Maybe$Nothing;
-			} else {
-				var key = dict.b;
-				var value = dict.c;
-				var left = dict.d;
-				var right = dict.e;
-				var _v1 = A2($elm$core$Basics$compare, targetKey, key);
-				switch (_v1.$) {
-					case 'LT':
-						var $temp$targetKey = targetKey,
-							$temp$dict = left;
-						targetKey = $temp$targetKey;
-						dict = $temp$dict;
-						continue get;
-					case 'EQ':
-						return $elm$core$Maybe$Just(value);
-					default:
-						var $temp$targetKey = targetKey,
-							$temp$dict = right;
-						targetKey = $temp$targetKey;
-						dict = $temp$dict;
-						continue get;
-				}
-			}
-		}
-	});
-var $author$project$C$Env$lookupAddr = F2(
-	function (env, name) {
-		return A2(
-			$elm$core$Result$fromMaybe,
-			'\'' + (name + '\' has not been defined'),
-			A2($elm$core$Dict$get, name, env.addrs));
-	});
-var $author$project$C$Env$lookupValue = F2(
-	function (env, name) {
-		return A2(
-			$elm$core$Result$andThen,
-			function (addr) {
-				return A2(
-					$elm$core$Result$fromMaybe,
-					'',
-					A2($elm$core$Dict$get, addr, env.store));
-			},
-			A2($author$project$C$Env$lookupAddr, env, name));
-	});
-var $elm$core$Result$map = F2(
-	function (func, ra) {
-		if (ra.$ === 'Ok') {
-			var a = ra.a;
-			return $elm$core$Result$Ok(
-				func(a));
-		} else {
-			var e = ra.a;
-			return $elm$core$Result$Err(e);
-		}
-	});
-var $author$project$C$Eval$eval = F2(
-	function (env, e) {
-		switch (e.$) {
-			case 'Null':
-				return $elm$core$Result$Ok(
-					$author$project$C$Val$P($elm$core$Maybe$Nothing));
-			case 'Lit':
-				var i = e.a;
-				return $elm$core$Result$Ok(
-					$author$project$C$Val$I(i));
-			case 'Var':
-				var n = e.a;
-				return A2($author$project$C$Env$lookupValue, env, n);
-			case 'Addr':
-				var n = e.a;
-				return A2(
-					$elm$core$Result$map,
-					A2($elm$core$Basics$composeL, $author$project$C$Val$P, $elm$core$Maybe$Just),
-					A2($author$project$C$Env$lookupAddr, env, n));
-			default:
-				var e_ = e.a;
-				return A2(
-					$elm$core$Result$andThen,
-					function (v) {
-						if (v.$ === 'P') {
-							if (v.a.$ === 'Nothing') {
-								var _v2 = v.a;
-								return $elm$core$Result$Err('tried to dereference null');
-							} else {
-								var i = v.a.a;
-								return A2(
-									$elm$core$Result$fromMaybe,
-									'got a dangling reference',
-									A2($elm$core$Dict$get, i, env.store));
-							}
-						} else {
-							return $elm$core$Result$Err('tried to dereference a plain integer');
-						}
-					},
-					A2($author$project$C$Eval$eval, env, e_));
-		}
-	});
-var $elm$core$Dict$Black = {$: 'Black'};
-var $elm$core$Dict$RBNode_elm_builtin = F5(
-	function (a, b, c, d, e) {
-		return {$: 'RBNode_elm_builtin', a: a, b: b, c: c, d: d, e: e};
-	});
-var $elm$core$Dict$Red = {$: 'Red'};
-var $elm$core$Dict$balance = F5(
-	function (color, key, value, left, right) {
-		if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Red')) {
-			var _v1 = right.a;
-			var rK = right.b;
-			var rV = right.c;
-			var rLeft = right.d;
-			var rRight = right.e;
-			if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
-				var _v3 = left.a;
-				var lK = left.b;
-				var lV = left.c;
-				var lLeft = left.d;
-				var lRight = left.e;
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					$elm$core$Dict$Red,
-					key,
-					value,
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, lK, lV, lLeft, lRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, rK, rV, rLeft, rRight));
-			} else {
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					color,
-					rK,
-					rV,
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, left, rLeft),
-					rRight);
-			}
-		} else {
-			if ((((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) && (left.d.$ === 'RBNode_elm_builtin')) && (left.d.a.$ === 'Red')) {
-				var _v5 = left.a;
-				var lK = left.b;
-				var lV = left.c;
-				var _v6 = left.d;
-				var _v7 = _v6.a;
-				var llK = _v6.b;
-				var llV = _v6.c;
-				var llLeft = _v6.d;
-				var llRight = _v6.e;
-				var lRight = left.e;
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					$elm$core$Dict$Red,
-					lK,
-					lV,
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, llK, llV, llLeft, llRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, key, value, lRight, right));
-			} else {
-				return A5($elm$core$Dict$RBNode_elm_builtin, color, key, value, left, right);
-			}
-		}
-	});
-var $elm$core$Dict$insertHelp = F3(
-	function (key, value, dict) {
-		if (dict.$ === 'RBEmpty_elm_builtin') {
-			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
-		} else {
-			var nColor = dict.a;
-			var nKey = dict.b;
-			var nValue = dict.c;
-			var nLeft = dict.d;
-			var nRight = dict.e;
-			var _v1 = A2($elm$core$Basics$compare, key, nKey);
-			switch (_v1.$) {
-				case 'LT':
-					return A5(
-						$elm$core$Dict$balance,
-						nColor,
-						nKey,
-						nValue,
-						A3($elm$core$Dict$insertHelp, key, value, nLeft),
-						nRight);
-				case 'EQ':
-					return A5($elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
-				default:
-					return A5(
-						$elm$core$Dict$balance,
-						nColor,
-						nKey,
-						nValue,
-						nLeft,
-						A3($elm$core$Dict$insertHelp, key, value, nRight));
-			}
-		}
-	});
-var $elm$core$Dict$insert = F3(
-	function (key, value, dict) {
-		var _v0 = A3($elm$core$Dict$insertHelp, key, value, dict);
-		if ((_v0.$ === 'RBNode_elm_builtin') && (_v0.a.$ === 'Red')) {
-			var _v1 = _v0.a;
-			var k = _v0.b;
-			var v = _v0.c;
-			var l = _v0.d;
-			var r = _v0.e;
-			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, l, r);
-		} else {
-			var x = _v0;
-			return x;
-		}
-	});
-var $elm$core$Basics$neq = _Utils_notEqual;
-var $author$project$C$Type$pretty = function (ct) {
-	if (ct.$ === 'IntT') {
-		return 'int';
-	} else {
-		var ct_ = ct.a;
-		return $author$project$C$Type$pretty(ct_) + '*';
-	}
-};
-var $author$project$C$Env$insert = F4(
-	function (env, t, n, v) {
-		var _v0 = A2($elm$core$Dict$get, n, env.types);
-		if (_v0.$ === 'Just') {
-			var t_ = _v0.a;
-			return (!_Utils_eq(t_, t)) ? $elm$core$Result$Err(
-				'type mismatch: the variable \'' + (n + ('\' is already defined to have type ' + ($author$project$C$Type$pretty(t_) + (', but this definition declares it to have type ' + $author$project$C$Type$pretty(t)))))) : A2(
-				$elm$core$Result$andThen,
-				function (a) {
-					return $elm$core$Result$Ok(
-						_Utils_update(
-							env,
-							{
-								store: A3($elm$core$Dict$insert, a, v, env.store)
-							}));
-				},
-				A2($author$project$C$Env$lookupAddr, env, n));
-		} else {
-			return $elm$core$Result$Ok(
-				_Utils_update(
-					env,
-					{
-						addrs: A3($elm$core$Dict$insert, n, env.nextAddr, env.addrs),
-						nextAddr: env.nextAddr + 1,
-						store: A3($elm$core$Dict$insert, env.nextAddr, v, env.store),
-						types: A3($elm$core$Dict$insert, n, t, env.types)
-					}));
-		}
-	});
-var $author$project$C$Type$PointerT = function (a) {
-	return {$: 'PointerT', a: a};
-};
-var $author$project$C$Env$lookupType = F2(
-	function (env, name) {
-		return A2(
-			$elm$core$Result$fromMaybe,
-			'\'' + (name + '\' has not been defined'),
-			A2($elm$core$Dict$get, name, env.types));
-	});
-var $author$project$C$Eval$typecheck = F3(
-	function (env, t, e) {
-		typecheck:
-		while (true) {
-			var _v0 = _Utils_Tuple2(t, e);
-			switch (_v0.b.$) {
-				case 'Var':
-					var n = _v0.b.a;
-					return A2(
-						$elm$core$Result$andThen,
-						function (t_) {
-							return (!_Utils_eq(t_, t)) ? $elm$core$Result$Err(
-								'expected \'' + (n + ('\' to have type ' + ($author$project$C$Type$pretty(t) + (', but got ' + $author$project$C$Type$pretty(t_)))))) : $elm$core$Result$Ok(_Utils_Tuple0);
-						},
-						A2($author$project$C$Env$lookupType, env, n));
-				case 'Deref':
-					var e_ = _v0.b.a;
-					var $temp$env = env,
-						$temp$t = $author$project$C$Type$PointerT(t),
-						$temp$e = e_;
-					env = $temp$env;
-					t = $temp$t;
-					e = $temp$e;
-					continue typecheck;
-				case 'Null':
-					if (_v0.a.$ === 'PointerT') {
-						var _v1 = _v0.b;
-						return $elm$core$Result$Ok(_Utils_Tuple0);
-					} else {
-						var _v3 = _v0.a;
-						var _v4 = _v0.b;
-						return $elm$core$Result$Err('type error: null is a value of pointer type');
-					}
-				case 'Addr':
-					if (_v0.a.$ === 'PointerT') {
-						var t1 = _v0.a.a;
-						var n = _v0.b.a;
-						return A2(
-							$elm$core$Result$andThen,
-							function (t_) {
-								return (!_Utils_eq(t_, t1)) ? $elm$core$Result$Err(
-									'expected \'' + (n + ('\' to have type ' + ($author$project$C$Type$pretty(t1) + (', but got ' + $author$project$C$Type$pretty(t_)))))) : $elm$core$Result$Ok(_Utils_Tuple0);
-							},
-							A2($author$project$C$Env$lookupType, env, n));
-					} else {
-						var _v5 = _v0.a;
-						return $elm$core$Result$Err('type error: taking the address of something results in a value of pointer type');
-					}
-				default:
-					if (_v0.a.$ === 'IntT') {
-						var _v2 = _v0.a;
-						var i = _v0.b.a;
-						return $elm$core$Result$Ok(_Utils_Tuple0);
-					} else {
-						return $elm$core$Result$Err('type error: the only pointer literal is null');
-					}
-			}
-		}
-	});
-var $author$project$C$Eval$elabDef = F2(
-	function (env, d) {
-		return A2(
-			$elm$core$Result$andThen,
-			function (v) {
-				return A4($author$project$C$Env$insert, env, d.typ, d.name, v);
-			},
-			A2(
-				$elm$core$Result$andThen,
-				function (_v0) {
-					return A2($author$project$C$Eval$eval, env, d.rhs);
-				},
-				A3($author$project$C$Eval$typecheck, env, d.typ, d.rhs)));
-	});
 var $elm$core$Result$mapError = F2(
 	function (f, result) {
 		if (result.$ === 'Ok') {
@@ -5790,10 +5437,12 @@ var $elm$core$Result$mapError = F2(
 				f(e));
 		}
 	});
-var $author$project$C$Def$Def = F3(
-	function (typ, name, rhs) {
-		return {name: name, rhs: rhs, typ: typ};
-	});
+var $author$project$C$Command$CDef = function (a) {
+	return {$: 'CDef', a: a};
+};
+var $author$project$C$Command$CStmt = function (a) {
+	return {$: 'CStmt', a: a};
+};
 var $elm$parser$Parser$ExpectingEnd = {$: 'ExpectingEnd'};
 var $elm$parser$Parser$Advanced$Bad = F2(
 	function (a, b) {
@@ -5881,6 +5530,76 @@ var $elm$parser$Parser$Advanced$keeper = F2(
 		return A3($elm$parser$Parser$Advanced$map2, $elm$core$Basics$apL, parseFunc, parseArg);
 	});
 var $elm$parser$Parser$keeper = $elm$parser$Parser$Advanced$keeper;
+var $elm$parser$Parser$Advanced$map = F2(
+	function (func, _v0) {
+		var parse = _v0.a;
+		return $elm$parser$Parser$Advanced$Parser(
+			function (s0) {
+				var _v1 = parse(s0);
+				if (_v1.$ === 'Good') {
+					var p = _v1.a;
+					var a = _v1.b;
+					var s1 = _v1.c;
+					return A3(
+						$elm$parser$Parser$Advanced$Good,
+						p,
+						func(a),
+						s1);
+				} else {
+					var p = _v1.a;
+					var x = _v1.b;
+					return A2($elm$parser$Parser$Advanced$Bad, p, x);
+				}
+			});
+	});
+var $elm$parser$Parser$map = $elm$parser$Parser$Advanced$map;
+var $elm$parser$Parser$Advanced$Append = F2(
+	function (a, b) {
+		return {$: 'Append', a: a, b: b};
+	});
+var $elm$parser$Parser$Advanced$oneOfHelp = F3(
+	function (s0, bag, parsers) {
+		oneOfHelp:
+		while (true) {
+			if (!parsers.b) {
+				return A2($elm$parser$Parser$Advanced$Bad, false, bag);
+			} else {
+				var parse = parsers.a.a;
+				var remainingParsers = parsers.b;
+				var _v1 = parse(s0);
+				if (_v1.$ === 'Good') {
+					var step = _v1;
+					return step;
+				} else {
+					var step = _v1;
+					var p = step.a;
+					var x = step.b;
+					if (p) {
+						return step;
+					} else {
+						var $temp$s0 = s0,
+							$temp$bag = A2($elm$parser$Parser$Advanced$Append, bag, x),
+							$temp$parsers = remainingParsers;
+						s0 = $temp$s0;
+						bag = $temp$bag;
+						parsers = $temp$parsers;
+						continue oneOfHelp;
+					}
+				}
+			}
+		}
+	});
+var $elm$parser$Parser$Advanced$oneOf = function (parsers) {
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			return A3($elm$parser$Parser$Advanced$oneOfHelp, s, $elm$parser$Parser$Advanced$Empty, parsers);
+		});
+};
+var $elm$parser$Parser$oneOf = $elm$parser$Parser$Advanced$oneOf;
+var $author$project$C$Def$Def = F3(
+	function (typ, name, rhs) {
+		return {name: name, rhs: rhs, typ: typ};
+	});
 var $author$project$C$Exp$Addr = function (a) {
 	return {$: 'Addr', a: a};
 };
@@ -6113,76 +5832,119 @@ var $elm$parser$Parser$Advanced$lazy = function (thunk) {
 		});
 };
 var $elm$parser$Parser$lazy = $elm$parser$Parser$Advanced$lazy;
-var $elm$parser$Parser$Advanced$map = F2(
-	function (func, _v0) {
-		var parse = _v0.a;
-		return $elm$parser$Parser$Advanced$Parser(
-			function (s0) {
-				var _v1 = parse(s0);
-				if (_v1.$ === 'Good') {
-					var p = _v1.a;
-					var a = _v1.b;
-					var s1 = _v1.c;
-					return A3(
-						$elm$parser$Parser$Advanced$Good,
-						p,
-						func(a),
-						s1);
-				} else {
-					var p = _v1.a;
-					var x = _v1.b;
-					return A2($elm$parser$Parser$Advanced$Bad, p, x);
-				}
-			});
-	});
-var $elm$parser$Parser$map = $elm$parser$Parser$Advanced$map;
-var $elm$parser$Parser$Advanced$Append = F2(
-	function (a, b) {
-		return {$: 'Append', a: a, b: b};
-	});
-var $elm$parser$Parser$Advanced$oneOfHelp = F3(
-	function (s0, bag, parsers) {
-		oneOfHelp:
-		while (true) {
-			if (!parsers.b) {
-				return A2($elm$parser$Parser$Advanced$Bad, false, bag);
-			} else {
-				var parse = parsers.a.a;
-				var remainingParsers = parsers.b;
-				var _v1 = parse(s0);
-				if (_v1.$ === 'Good') {
-					var step = _v1;
-					return step;
-				} else {
-					var step = _v1;
-					var p = step.a;
-					var x = step.b;
-					if (p) {
-						return step;
-					} else {
-						var $temp$s0 = s0,
-							$temp$bag = A2($elm$parser$Parser$Advanced$Append, bag, x),
-							$temp$parsers = remainingParsers;
-						s0 = $temp$s0;
-						bag = $temp$bag;
-						parsers = $temp$parsers;
-						continue oneOfHelp;
-					}
-				}
-			}
-		}
-	});
-var $elm$parser$Parser$Advanced$oneOf = function (parsers) {
-	return $elm$parser$Parser$Advanced$Parser(
-		function (s) {
-			return A3($elm$parser$Parser$Advanced$oneOfHelp, s, $elm$parser$Parser$Advanced$Empty, parsers);
-		});
-};
-var $elm$parser$Parser$oneOf = $elm$parser$Parser$Advanced$oneOf;
 var $elm$core$Set$Set_elm_builtin = function (a) {
 	return {$: 'Set_elm_builtin', a: a};
 };
 var $elm$core$Set$empty = $elm$core$Set$Set_elm_builtin($elm$core$Dict$empty);
+var $elm$core$Dict$Black = {$: 'Black'};
+var $elm$core$Dict$RBNode_elm_builtin = F5(
+	function (a, b, c, d, e) {
+		return {$: 'RBNode_elm_builtin', a: a, b: b, c: c, d: d, e: e};
+	});
+var $elm$core$Dict$Red = {$: 'Red'};
+var $elm$core$Dict$balance = F5(
+	function (color, key, value, left, right) {
+		if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Red')) {
+			var _v1 = right.a;
+			var rK = right.b;
+			var rV = right.c;
+			var rLeft = right.d;
+			var rRight = right.e;
+			if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
+				var _v3 = left.a;
+				var lK = left.b;
+				var lV = left.c;
+				var lLeft = left.d;
+				var lRight = left.e;
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Red,
+					key,
+					value,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, rK, rV, rLeft, rRight));
+			} else {
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					color,
+					rK,
+					rV,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, left, rLeft),
+					rRight);
+			}
+		} else {
+			if ((((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) && (left.d.$ === 'RBNode_elm_builtin')) && (left.d.a.$ === 'Red')) {
+				var _v5 = left.a;
+				var lK = left.b;
+				var lV = left.c;
+				var _v6 = left.d;
+				var _v7 = _v6.a;
+				var llK = _v6.b;
+				var llV = _v6.c;
+				var llLeft = _v6.d;
+				var llRight = _v6.e;
+				var lRight = left.e;
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Red,
+					lK,
+					lV,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, llK, llV, llLeft, llRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, key, value, lRight, right));
+			} else {
+				return A5($elm$core$Dict$RBNode_elm_builtin, color, key, value, left, right);
+			}
+		}
+	});
+var $elm$core$Basics$compare = _Utils_compare;
+var $elm$core$Dict$insertHelp = F3(
+	function (key, value, dict) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
+		} else {
+			var nColor = dict.a;
+			var nKey = dict.b;
+			var nValue = dict.c;
+			var nLeft = dict.d;
+			var nRight = dict.e;
+			var _v1 = A2($elm$core$Basics$compare, key, nKey);
+			switch (_v1.$) {
+				case 'LT':
+					return A5(
+						$elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						A3($elm$core$Dict$insertHelp, key, value, nLeft),
+						nRight);
+				case 'EQ':
+					return A5($elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
+				default:
+					return A5(
+						$elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						nLeft,
+						A3($elm$core$Dict$insertHelp, key, value, nRight));
+			}
+		}
+	});
+var $elm$core$Dict$insert = F3(
+	function (key, value, dict) {
+		var _v0 = A3($elm$core$Dict$insertHelp, key, value, dict);
+		if ((_v0.$ === 'RBNode_elm_builtin') && (_v0.a.$ === 'Red')) {
+			var _v1 = _v0.a;
+			var k = _v0.b;
+			var v = _v0.c;
+			var l = _v0.d;
+			var r = _v0.e;
+			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, l, r);
+		} else {
+			var x = _v0;
+			return x;
+		}
+	});
 var $elm$core$Set$insert = F2(
 	function (key, _v0) {
 		var dict = _v0.a;
@@ -6193,6 +5955,37 @@ var $elm$core$Set$fromList = function (list) {
 	return A3($elm$core$List$foldl, $elm$core$Set$insert, $elm$core$Set$empty, list);
 };
 var $elm$parser$Parser$ExpectingVariable = {$: 'ExpectingVariable'};
+var $elm$core$Dict$get = F2(
+	function (targetKey, dict) {
+		get:
+		while (true) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var key = dict.b;
+				var value = dict.c;
+				var left = dict.d;
+				var right = dict.e;
+				var _v1 = A2($elm$core$Basics$compare, targetKey, key);
+				switch (_v1.$) {
+					case 'LT':
+						var $temp$targetKey = targetKey,
+							$temp$dict = left;
+						targetKey = $temp$targetKey;
+						dict = $temp$dict;
+						continue get;
+					case 'EQ':
+						return $elm$core$Maybe$Just(value);
+					default:
+						var $temp$targetKey = targetKey,
+							$temp$dict = right;
+						targetKey = $temp$targetKey;
+						dict = $temp$dict;
+						continue get;
+				}
+			}
+		}
+	});
 var $elm$core$Dict$member = F2(
 	function (key, dict) {
 		var _v0 = A2($elm$core$Dict$get, key, dict);
@@ -6324,7 +6117,7 @@ var $elm$parser$Parser$symbol = function (str) {
 			str,
 			$elm$parser$Parser$ExpectingSymbol(str)));
 };
-var $author$project$C$Parse$parseExp = function (env) {
+function $author$project$C$Parse$cyclic$parseExp() {
 	return $elm$parser$Parser$oneOf(
 		_List_fromArray(
 			[
@@ -6348,14 +6141,21 @@ var $author$project$C$Parse$parseExp = function (env) {
 					$elm$parser$Parser$symbol('*')),
 				$elm$parser$Parser$lazy(
 					function (_v0) {
-						return $author$project$C$Parse$parseExp(env);
+						return $author$project$C$Parse$cyclic$parseExp();
 					})),
 				A2(
 				$elm$parser$Parser$keeper,
 				$elm$parser$Parser$succeed($author$project$C$Exp$Var),
 				$author$project$C$Parse$parseVarName)
 			]));
-};
+}
+try {
+	var $author$project$C$Parse$parseExp = $author$project$C$Parse$cyclic$parseExp();
+	$author$project$C$Parse$cyclic$parseExp = function () {
+		return $author$project$C$Parse$parseExp;
+	};
+} catch ($) {
+	throw 'Some top-level definitions from `C.Parse` are causing infinite recursion:\n\n  ┌─────┐\n  │    parseExp\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.1/bad-recursion to learn how to fix it!';}
 var $author$project$C$Type$IntT = {$: 'IntT'};
 var $elm$parser$Parser$Advanced$loopHelp = F4(
 	function (p, state, callback, s0) {
@@ -6430,6 +6230,14 @@ var $elm$parser$Parser$Done = function (a) {
 var $elm$parser$Parser$Loop = function (a) {
 	return {$: 'Loop', a: a};
 };
+var $author$project$C$Type$PointerT = function (a) {
+	return {$: 'PointerT', a: a};
+};
+var $elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
+	});
 var $author$project$C$Parse$parseStars = function (appPointerT) {
 	return $elm$parser$Parser$oneOf(
 		_List_fromArray(
@@ -6514,39 +6322,93 @@ var $author$project$C$Parse$parseType = A2(
 			$elm$parser$Parser$spaces),
 		A2($elm$parser$Parser$loop, $elm$core$Basics$identity, $author$project$C$Parse$parseStars)),
 	$elm$parser$Parser$succeed($author$project$C$Type$IntT));
-var $author$project$C$Parse$parseDef = function (env) {
-	return A2(
+var $author$project$C$Parse$parseDef = A2(
+	$elm$parser$Parser$keeper,
+	A2(
 		$elm$parser$Parser$keeper,
 		A2(
 			$elm$parser$Parser$keeper,
-			A2(
-				$elm$parser$Parser$keeper,
-				A2(
-					$elm$parser$Parser$ignorer,
-					$elm$parser$Parser$succeed($author$project$C$Def$Def),
-					$elm$parser$Parser$spaces),
-				A2($elm$parser$Parser$ignorer, $author$project$C$Parse$parseType, $elm$parser$Parser$spaces)),
-			A2(
-				$elm$parser$Parser$ignorer,
-				A2(
-					$elm$parser$Parser$ignorer,
-					A2($elm$parser$Parser$ignorer, $author$project$C$Parse$parseVarName, $elm$parser$Parser$spaces),
-					$elm$parser$Parser$symbol('=')),
-				$elm$parser$Parser$spaces)),
+			$elm$parser$Parser$succeed($author$project$C$Def$Def),
+			A2($elm$parser$Parser$ignorer, $author$project$C$Parse$parseType, $elm$parser$Parser$spaces)),
 		A2(
 			$elm$parser$Parser$ignorer,
 			A2(
 				$elm$parser$Parser$ignorer,
+				A2($elm$parser$Parser$ignorer, $author$project$C$Parse$parseVarName, $elm$parser$Parser$spaces),
+				$elm$parser$Parser$symbol('=')),
+			$elm$parser$Parser$spaces)),
+	A2(
+		$elm$parser$Parser$ignorer,
+		A2($elm$parser$Parser$ignorer, $author$project$C$Parse$parseExp, $elm$parser$Parser$spaces),
+		$elm$parser$Parser$symbol(';')));
+var $author$project$C$Stmt$Assign = F2(
+	function (a, b) {
+		return {$: 'Assign', a: a, b: b};
+	});
+var $author$project$C$Stmt$LDeref = function (a) {
+	return {$: 'LDeref', a: a};
+};
+var $author$project$C$Stmt$LVar = function (a) {
+	return {$: 'LVar', a: a};
+};
+function $author$project$C$Parse$cyclic$parseLValue() {
+	return $elm$parser$Parser$oneOf(
+		_List_fromArray(
+			[
+				A2(
+				$elm$parser$Parser$keeper,
 				A2(
 					$elm$parser$Parser$ignorer,
-					A2(
-						$elm$parser$Parser$ignorer,
-						$author$project$C$Parse$parseExp(env),
-						$elm$parser$Parser$spaces),
-					$elm$parser$Parser$symbol(';')),
-				$elm$parser$Parser$spaces),
-			$elm$parser$Parser$end));
-};
+					$elm$parser$Parser$succeed($author$project$C$Stmt$LDeref),
+					$elm$parser$Parser$symbol('*')),
+				$elm$parser$Parser$lazy(
+					function (_v0) {
+						return $author$project$C$Parse$cyclic$parseLValue();
+					})),
+				A2(
+				$elm$parser$Parser$keeper,
+				$elm$parser$Parser$succeed($author$project$C$Stmt$LVar),
+				$author$project$C$Parse$parseVarName)
+			]));
+}
+try {
+	var $author$project$C$Parse$parseLValue = $author$project$C$Parse$cyclic$parseLValue();
+	$author$project$C$Parse$cyclic$parseLValue = function () {
+		return $author$project$C$Parse$parseLValue;
+	};
+} catch ($) {
+	throw 'Some top-level definitions from `C.Parse` are causing infinite recursion:\n\n  ┌─────┐\n  │    parseLValue\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.1/bad-recursion to learn how to fix it!';}
+var $author$project$C$Parse$parseStmt = A2(
+	$elm$parser$Parser$keeper,
+	A2(
+		$elm$parser$Parser$keeper,
+		$elm$parser$Parser$succeed($author$project$C$Stmt$Assign),
+		A2(
+			$elm$parser$Parser$ignorer,
+			A2(
+				$elm$parser$Parser$ignorer,
+				A2($elm$parser$Parser$ignorer, $author$project$C$Parse$parseLValue, $elm$parser$Parser$spaces),
+				$elm$parser$Parser$symbol('=')),
+			$elm$parser$Parser$spaces)),
+	A2(
+		$elm$parser$Parser$ignorer,
+		A2($elm$parser$Parser$ignorer, $author$project$C$Parse$parseExp, $elm$parser$Parser$spaces),
+		$elm$parser$Parser$symbol(';')));
+var $author$project$C$Parse$parseCommand = A2(
+	$elm$parser$Parser$keeper,
+	A2(
+		$elm$parser$Parser$ignorer,
+		$elm$parser$Parser$succeed($elm$core$Basics$identity),
+		$elm$parser$Parser$spaces),
+	A2(
+		$elm$parser$Parser$ignorer,
+		$elm$parser$Parser$oneOf(
+			_List_fromArray(
+				[
+					A2($elm$parser$Parser$map, $author$project$C$Command$CDef, $author$project$C$Parse$parseDef),
+					A2($elm$parser$Parser$map, $author$project$C$Command$CStmt, $author$project$C$Parse$parseStmt)
+				])),
+		$elm$parser$Parser$end));
 var $elm$parser$Parser$DeadEnd = F3(
 	function (row, col, problem) {
 		return {col: col, problem: problem, row: row};
@@ -6606,18 +6468,720 @@ var $elm$parser$Parser$run = F2(
 				A2($elm$core$List$map, $elm$parser$Parser$problemToDeadEnd, problems));
 		}
 	});
-var $author$project$C$Eval$elabDefStr = F2(
+var $author$project$C$Val$I = function (a) {
+	return {$: 'I', a: a};
+};
+var $author$project$C$Val$P = function (a) {
+	return {$: 'P', a: a};
+};
+var $elm$core$Result$fromMaybe = F2(
+	function (err, maybe) {
+		if (maybe.$ === 'Just') {
+			var v = maybe.a;
+			return $elm$core$Result$Ok(v);
+		} else {
+			return $elm$core$Result$Err(err);
+		}
+	});
+var $author$project$C$Env$lookupAddr = F2(
+	function (env, name) {
+		return A2(
+			$elm$core$Result$fromMaybe,
+			'\'' + (name + '\' has not been defined'),
+			A2($elm$core$Dict$get, name, env.addrs));
+	});
+var $author$project$C$Env$lookupValue = F2(
+	function (env, name) {
+		return A2(
+			$elm$core$Result$andThen,
+			function (addr) {
+				return A2(
+					$elm$core$Result$fromMaybe,
+					'',
+					A2($elm$core$Dict$get, addr, env.store));
+			},
+			A2($author$project$C$Env$lookupAddr, env, name));
+	});
+var $elm$core$Result$map = F2(
+	function (func, ra) {
+		if (ra.$ === 'Ok') {
+			var a = ra.a;
+			return $elm$core$Result$Ok(
+				func(a));
+		} else {
+			var e = ra.a;
+			return $elm$core$Result$Err(e);
+		}
+	});
+var $author$project$C$Eval$evalExp = F2(
+	function (env, e) {
+		switch (e.$) {
+			case 'Null':
+				return $elm$core$Result$Ok(
+					$author$project$C$Val$P($elm$core$Maybe$Nothing));
+			case 'Lit':
+				var i = e.a;
+				return $elm$core$Result$Ok(
+					$author$project$C$Val$I(i));
+			case 'Var':
+				var n = e.a;
+				return A2($author$project$C$Env$lookupValue, env, n);
+			case 'Addr':
+				var n = e.a;
+				return A2(
+					$elm$core$Result$map,
+					A2($elm$core$Basics$composeL, $author$project$C$Val$P, $elm$core$Maybe$Just),
+					A2($author$project$C$Env$lookupAddr, env, n));
+			default:
+				var e_ = e.a;
+				return A2(
+					$elm$core$Result$andThen,
+					function (v) {
+						if (v.$ === 'P') {
+							if (v.a.$ === 'Nothing') {
+								var _v2 = v.a;
+								return $elm$core$Result$Err('tried to dereference null');
+							} else {
+								var i = v.a.a;
+								return A2(
+									$elm$core$Result$fromMaybe,
+									'got a dangling reference',
+									A2($elm$core$Dict$get, i, env.store));
+							}
+						} else {
+							return $elm$core$Result$Err('tried to dereference a plain integer');
+						}
+					},
+					A2($author$project$C$Eval$evalExp, env, e_));
+		}
+	});
+var $elm$core$Basics$neq = _Utils_notEqual;
+var $author$project$C$Type$pretty = function (ct) {
+	if (ct.$ === 'IntT') {
+		return 'int';
+	} else {
+		var ct_ = ct.a;
+		return $author$project$C$Type$pretty(ct_) + '*';
+	}
+};
+var $author$project$C$Env$insert = F4(
+	function (env, t, n, v) {
+		var _v0 = A2($elm$core$Dict$get, n, env.types);
+		if (_v0.$ === 'Just') {
+			var t_ = _v0.a;
+			return (!_Utils_eq(t_, t)) ? $elm$core$Result$Err(
+				'type mismatch: the variable \'' + (n + ('\' is already defined to have type ' + ($author$project$C$Type$pretty(t_) + (', but this definition declares it to have type ' + $author$project$C$Type$pretty(t)))))) : A2(
+				$elm$core$Result$andThen,
+				function (a) {
+					return $elm$core$Result$Ok(
+						_Utils_update(
+							env,
+							{
+								store: A3($elm$core$Dict$insert, a, v, env.store)
+							}));
+				},
+				A2($author$project$C$Env$lookupAddr, env, n));
+		} else {
+			return $elm$core$Result$Ok(
+				_Utils_update(
+					env,
+					{
+						addrs: A3($elm$core$Dict$insert, n, env.nextAddr, env.addrs),
+						nextAddr: env.nextAddr + 1,
+						store: A3($elm$core$Dict$insert, env.nextAddr, v, env.store),
+						types: A3($elm$core$Dict$insert, n, t, env.types)
+					}));
+		}
+	});
+var $author$project$C$Env$lookupType = F2(
+	function (env, name) {
+		return A2(
+			$elm$core$Result$fromMaybe,
+			'\'' + (name + '\' has not been defined'),
+			A2($elm$core$Dict$get, name, env.types));
+	});
+var $author$project$C$Eval$typecheck = F3(
+	function (env, t, e) {
+		typecheck:
+		while (true) {
+			var _v0 = _Utils_Tuple2(t, e);
+			switch (_v0.b.$) {
+				case 'Var':
+					var n = _v0.b.a;
+					return A2(
+						$elm$core$Result$andThen,
+						function (t_) {
+							return (!_Utils_eq(t_, t)) ? $elm$core$Result$Err(
+								'expected \'' + (n + ('\' to have type ' + ($author$project$C$Type$pretty(t) + (', but got ' + $author$project$C$Type$pretty(t_)))))) : $elm$core$Result$Ok(_Utils_Tuple0);
+						},
+						A2($author$project$C$Env$lookupType, env, n));
+				case 'Deref':
+					var e_ = _v0.b.a;
+					var $temp$env = env,
+						$temp$t = $author$project$C$Type$PointerT(t),
+						$temp$e = e_;
+					env = $temp$env;
+					t = $temp$t;
+					e = $temp$e;
+					continue typecheck;
+				case 'Null':
+					if (_v0.a.$ === 'PointerT') {
+						var _v1 = _v0.b;
+						return $elm$core$Result$Ok(_Utils_Tuple0);
+					} else {
+						var _v3 = _v0.a;
+						var _v4 = _v0.b;
+						return $elm$core$Result$Err('type error: null is a value of pointer type');
+					}
+				case 'Addr':
+					if (_v0.a.$ === 'PointerT') {
+						var t1 = _v0.a.a;
+						var n = _v0.b.a;
+						return A2(
+							$elm$core$Result$andThen,
+							function (t_) {
+								return (!_Utils_eq(t_, t1)) ? $elm$core$Result$Err(
+									'expected \'' + (n + ('\' to have type ' + ($author$project$C$Type$pretty(t1) + (', but got ' + $author$project$C$Type$pretty(t_)))))) : $elm$core$Result$Ok(_Utils_Tuple0);
+							},
+							A2($author$project$C$Env$lookupType, env, n));
+					} else {
+						var _v5 = _v0.a;
+						return $elm$core$Result$Err('type error: taking the address of something results in a value of pointer type');
+					}
+				default:
+					if (_v0.a.$ === 'IntT') {
+						var _v2 = _v0.a;
+						var i = _v0.b.a;
+						return $elm$core$Result$Ok(_Utils_Tuple0);
+					} else {
+						return $elm$core$Result$Err('type error: the only pointer literal is null');
+					}
+			}
+		}
+	});
+var $author$project$C$Eval$elabDef = F2(
+	function (env, d) {
+		return A2(
+			$elm$core$Result$andThen,
+			function (v) {
+				return A4($author$project$C$Env$insert, env, d.typ, d.name, v);
+			},
+			A2(
+				$elm$core$Result$andThen,
+				function (_v0) {
+					return A2($author$project$C$Eval$evalExp, env, d.rhs);
+				},
+				A3($author$project$C$Eval$typecheck, env, d.typ, d.rhs)));
+	});
+var $author$project$C$Env$lookupValueAtAddr = F2(
+	function (env, a) {
+		return A2(
+			$elm$core$Result$fromMaybe,
+			'',
+			A2($elm$core$Dict$get, a, env.store));
+	});
+var $elm$core$Result$toMaybe = function (result) {
+	if (result.$ === 'Ok') {
+		var v = result.a;
+		return $elm$core$Maybe$Just(v);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$C$Eval$addrOfLValue = F2(
+	function (env, lv) {
+		if (lv.$ === 'LVar') {
+			var n = lv.a;
+			return A2($author$project$C$Env$lookupAddr, env, n);
+		} else {
+			var lv_ = lv.a;
+			var _v1 = $elm$core$Result$toMaybe(
+				A2(
+					$elm$core$Result$andThen,
+					function (a) {
+						return A2($author$project$C$Env$lookupValueAtAddr, env, a);
+					},
+					A2($author$project$C$Eval$addrOfLValue, env, lv_)));
+			if (_v1.$ === 'Nothing') {
+				return $elm$core$Result$Err('could not resolve lvalue to a value');
+			} else {
+				if (_v1.a.$ === 'P') {
+					if (_v1.a.a.$ === 'Nothing') {
+						var _v2 = _v1.a.a;
+						return $elm$core$Result$Err('lvalue cannot be null');
+					} else {
+						var i = _v1.a.a.a;
+						return $elm$core$Result$Ok(i);
+					}
+				} else {
+					return $elm$core$Result$Err('lvalue cannot be a plain integer');
+				}
+			}
+		}
+	});
+var $author$project$C$Eval$lvalueType = F2(
+	function (env, lv) {
+		if (lv.$ === 'LVar') {
+			var n = lv.a;
+			return A2($author$project$C$Env$lookupType, env, n);
+		} else {
+			var lv_ = lv.a;
+			return A2(
+				$elm$core$Result$andThen,
+				function (t) {
+					if (t.$ === 'PointerT') {
+						var t_ = t.a;
+						return $elm$core$Result$Ok(t_);
+					} else {
+						return $elm$core$Result$Err('type error: cannot dereference an lvalue of integer type');
+					}
+				},
+				A2($author$project$C$Eval$lvalueType, env, lv_));
+		}
+	});
+var $elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return $elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $elm$core$Dict$getMin = function (dict) {
+	getMin:
+	while (true) {
+		if ((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) {
+			var left = dict.d;
+			var $temp$dict = left;
+			dict = $temp$dict;
+			continue getMin;
+		} else {
+			return dict;
+		}
+	}
+};
+var $elm$core$Dict$moveRedLeft = function (dict) {
+	if (((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) && (dict.e.$ === 'RBNode_elm_builtin')) {
+		if ((dict.e.d.$ === 'RBNode_elm_builtin') && (dict.e.d.a.$ === 'Red')) {
+			var clr = dict.a;
+			var k = dict.b;
+			var v = dict.c;
+			var _v1 = dict.d;
+			var lClr = _v1.a;
+			var lK = _v1.b;
+			var lV = _v1.c;
+			var lLeft = _v1.d;
+			var lRight = _v1.e;
+			var _v2 = dict.e;
+			var rClr = _v2.a;
+			var rK = _v2.b;
+			var rV = _v2.c;
+			var rLeft = _v2.d;
+			var _v3 = rLeft.a;
+			var rlK = rLeft.b;
+			var rlV = rLeft.c;
+			var rlL = rLeft.d;
+			var rlR = rLeft.e;
+			var rRight = _v2.e;
+			return A5(
+				$elm$core$Dict$RBNode_elm_builtin,
+				$elm$core$Dict$Red,
+				rlK,
+				rlV,
+				A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Black,
+					k,
+					v,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					rlL),
+				A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, rK, rV, rlR, rRight));
+		} else {
+			var clr = dict.a;
+			var k = dict.b;
+			var v = dict.c;
+			var _v4 = dict.d;
+			var lClr = _v4.a;
+			var lK = _v4.b;
+			var lV = _v4.c;
+			var lLeft = _v4.d;
+			var lRight = _v4.e;
+			var _v5 = dict.e;
+			var rClr = _v5.a;
+			var rK = _v5.b;
+			var rV = _v5.c;
+			var rLeft = _v5.d;
+			var rRight = _v5.e;
+			if (clr.$ === 'Black') {
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Black,
+					k,
+					v,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight));
+			} else {
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Black,
+					k,
+					v,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight));
+			}
+		}
+	} else {
+		return dict;
+	}
+};
+var $elm$core$Dict$moveRedRight = function (dict) {
+	if (((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) && (dict.e.$ === 'RBNode_elm_builtin')) {
+		if ((dict.d.d.$ === 'RBNode_elm_builtin') && (dict.d.d.a.$ === 'Red')) {
+			var clr = dict.a;
+			var k = dict.b;
+			var v = dict.c;
+			var _v1 = dict.d;
+			var lClr = _v1.a;
+			var lK = _v1.b;
+			var lV = _v1.c;
+			var _v2 = _v1.d;
+			var _v3 = _v2.a;
+			var llK = _v2.b;
+			var llV = _v2.c;
+			var llLeft = _v2.d;
+			var llRight = _v2.e;
+			var lRight = _v1.e;
+			var _v4 = dict.e;
+			var rClr = _v4.a;
+			var rK = _v4.b;
+			var rV = _v4.c;
+			var rLeft = _v4.d;
+			var rRight = _v4.e;
+			return A5(
+				$elm$core$Dict$RBNode_elm_builtin,
+				$elm$core$Dict$Red,
+				lK,
+				lV,
+				A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, llK, llV, llLeft, llRight),
+				A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Black,
+					k,
+					v,
+					lRight,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight)));
+		} else {
+			var clr = dict.a;
+			var k = dict.b;
+			var v = dict.c;
+			var _v5 = dict.d;
+			var lClr = _v5.a;
+			var lK = _v5.b;
+			var lV = _v5.c;
+			var lLeft = _v5.d;
+			var lRight = _v5.e;
+			var _v6 = dict.e;
+			var rClr = _v6.a;
+			var rK = _v6.b;
+			var rV = _v6.c;
+			var rLeft = _v6.d;
+			var rRight = _v6.e;
+			if (clr.$ === 'Black') {
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Black,
+					k,
+					v,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight));
+			} else {
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Black,
+					k,
+					v,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight));
+			}
+		}
+	} else {
+		return dict;
+	}
+};
+var $elm$core$Dict$removeHelpPrepEQGT = F7(
+	function (targetKey, dict, color, key, value, left, right) {
+		if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
+			var _v1 = left.a;
+			var lK = left.b;
+			var lV = left.c;
+			var lLeft = left.d;
+			var lRight = left.e;
+			return A5(
+				$elm$core$Dict$RBNode_elm_builtin,
+				color,
+				lK,
+				lV,
+				lLeft,
+				A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, lRight, right));
+		} else {
+			_v2$2:
+			while (true) {
+				if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Black')) {
+					if (right.d.$ === 'RBNode_elm_builtin') {
+						if (right.d.a.$ === 'Black') {
+							var _v3 = right.a;
+							var _v4 = right.d;
+							var _v5 = _v4.a;
+							return $elm$core$Dict$moveRedRight(dict);
+						} else {
+							break _v2$2;
+						}
+					} else {
+						var _v6 = right.a;
+						var _v7 = right.d;
+						return $elm$core$Dict$moveRedRight(dict);
+					}
+				} else {
+					break _v2$2;
+				}
+			}
+			return dict;
+		}
+	});
+var $elm$core$Dict$removeMin = function (dict) {
+	if ((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) {
+		var color = dict.a;
+		var key = dict.b;
+		var value = dict.c;
+		var left = dict.d;
+		var lColor = left.a;
+		var lLeft = left.d;
+		var right = dict.e;
+		if (lColor.$ === 'Black') {
+			if ((lLeft.$ === 'RBNode_elm_builtin') && (lLeft.a.$ === 'Red')) {
+				var _v3 = lLeft.a;
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					color,
+					key,
+					value,
+					$elm$core$Dict$removeMin(left),
+					right);
+			} else {
+				var _v4 = $elm$core$Dict$moveRedLeft(dict);
+				if (_v4.$ === 'RBNode_elm_builtin') {
+					var nColor = _v4.a;
+					var nKey = _v4.b;
+					var nValue = _v4.c;
+					var nLeft = _v4.d;
+					var nRight = _v4.e;
+					return A5(
+						$elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						$elm$core$Dict$removeMin(nLeft),
+						nRight);
+				} else {
+					return $elm$core$Dict$RBEmpty_elm_builtin;
+				}
+			}
+		} else {
+			return A5(
+				$elm$core$Dict$RBNode_elm_builtin,
+				color,
+				key,
+				value,
+				$elm$core$Dict$removeMin(left),
+				right);
+		}
+	} else {
+		return $elm$core$Dict$RBEmpty_elm_builtin;
+	}
+};
+var $elm$core$Dict$removeHelp = F2(
+	function (targetKey, dict) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return $elm$core$Dict$RBEmpty_elm_builtin;
+		} else {
+			var color = dict.a;
+			var key = dict.b;
+			var value = dict.c;
+			var left = dict.d;
+			var right = dict.e;
+			if (_Utils_cmp(targetKey, key) < 0) {
+				if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Black')) {
+					var _v4 = left.a;
+					var lLeft = left.d;
+					if ((lLeft.$ === 'RBNode_elm_builtin') && (lLeft.a.$ === 'Red')) {
+						var _v6 = lLeft.a;
+						return A5(
+							$elm$core$Dict$RBNode_elm_builtin,
+							color,
+							key,
+							value,
+							A2($elm$core$Dict$removeHelp, targetKey, left),
+							right);
+					} else {
+						var _v7 = $elm$core$Dict$moveRedLeft(dict);
+						if (_v7.$ === 'RBNode_elm_builtin') {
+							var nColor = _v7.a;
+							var nKey = _v7.b;
+							var nValue = _v7.c;
+							var nLeft = _v7.d;
+							var nRight = _v7.e;
+							return A5(
+								$elm$core$Dict$balance,
+								nColor,
+								nKey,
+								nValue,
+								A2($elm$core$Dict$removeHelp, targetKey, nLeft),
+								nRight);
+						} else {
+							return $elm$core$Dict$RBEmpty_elm_builtin;
+						}
+					}
+				} else {
+					return A5(
+						$elm$core$Dict$RBNode_elm_builtin,
+						color,
+						key,
+						value,
+						A2($elm$core$Dict$removeHelp, targetKey, left),
+						right);
+				}
+			} else {
+				return A2(
+					$elm$core$Dict$removeHelpEQGT,
+					targetKey,
+					A7($elm$core$Dict$removeHelpPrepEQGT, targetKey, dict, color, key, value, left, right));
+			}
+		}
+	});
+var $elm$core$Dict$removeHelpEQGT = F2(
+	function (targetKey, dict) {
+		if (dict.$ === 'RBNode_elm_builtin') {
+			var color = dict.a;
+			var key = dict.b;
+			var value = dict.c;
+			var left = dict.d;
+			var right = dict.e;
+			if (_Utils_eq(targetKey, key)) {
+				var _v1 = $elm$core$Dict$getMin(right);
+				if (_v1.$ === 'RBNode_elm_builtin') {
+					var minKey = _v1.b;
+					var minValue = _v1.c;
+					return A5(
+						$elm$core$Dict$balance,
+						color,
+						minKey,
+						minValue,
+						left,
+						$elm$core$Dict$removeMin(right));
+				} else {
+					return $elm$core$Dict$RBEmpty_elm_builtin;
+				}
+			} else {
+				return A5(
+					$elm$core$Dict$balance,
+					color,
+					key,
+					value,
+					left,
+					A2($elm$core$Dict$removeHelp, targetKey, right));
+			}
+		} else {
+			return $elm$core$Dict$RBEmpty_elm_builtin;
+		}
+	});
+var $elm$core$Dict$remove = F2(
+	function (key, dict) {
+		var _v0 = A2($elm$core$Dict$removeHelp, key, dict);
+		if ((_v0.$ === 'RBNode_elm_builtin') && (_v0.a.$ === 'Red')) {
+			var _v1 = _v0.a;
+			var k = _v0.b;
+			var v = _v0.c;
+			var l = _v0.d;
+			var r = _v0.e;
+			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, l, r);
+		} else {
+			var x = _v0;
+			return x;
+		}
+	});
+var $elm$core$Dict$update = F3(
+	function (targetKey, alter, dictionary) {
+		var _v0 = alter(
+			A2($elm$core$Dict$get, targetKey, dictionary));
+		if (_v0.$ === 'Just') {
+			var value = _v0.a;
+			return A3($elm$core$Dict$insert, targetKey, value, dictionary);
+		} else {
+			return A2($elm$core$Dict$remove, targetKey, dictionary);
+		}
+	});
+var $author$project$C$Env$updateAtAddr = F3(
+	function (env, a, v) {
+		return A2($elm$core$Dict$member, a, env.store) ? $elm$core$Result$Ok(
+			_Utils_update(
+				env,
+				{
+					store: A3(
+						$elm$core$Dict$update,
+						a,
+						$elm$core$Maybe$map(
+							$elm$core$Basics$always(v)),
+						env.store)
+				})) : $elm$core$Result$Err(
+			'address ' + ($elm$core$String$fromInt(a) + ' is not in use'));
+	});
+var $author$project$C$Eval$runStmt = F2(
+	function (env, s) {
+		var lv = s.a;
+		var e = s.b;
+		return A2(
+			$elm$core$Result$andThen,
+			function (t) {
+				return A2(
+					$elm$core$Result$andThen,
+					function (v) {
+						return A2(
+							$elm$core$Result$andThen,
+							function (a) {
+								return A3($author$project$C$Env$updateAtAddr, env, a, v);
+							},
+							A2($author$project$C$Eval$addrOfLValue, env, lv));
+					},
+					A2(
+						$elm$core$Result$andThen,
+						function (_v1) {
+							return A2($author$project$C$Eval$evalExp, env, e);
+						},
+						A3($author$project$C$Eval$typecheck, env, t, e)));
+			},
+			A2($author$project$C$Eval$lvalueType, env, lv));
+	});
+var $author$project$C$Eval$runCommand = F2(
+	function (env, c) {
+		if (c.$ === 'CDef') {
+			var def = c.a;
+			return A2($author$project$C$Eval$elabDef, env, def);
+		} else {
+			var stmt = c.a;
+			return A2($author$project$C$Eval$runStmt, env, stmt);
+		}
+	});
+var $author$project$C$Eval$runCommandStr = F2(
 	function (env, s) {
 		return A2(
 			$elm$core$Result$andThen,
-			$author$project$C$Eval$elabDef(env),
+			$author$project$C$Eval$runCommand(env),
 			A2(
 				$elm$core$Result$mapError,
 				$author$project$Parser$Extra$deadEndsToString,
-				A2(
-					$elm$parser$Parser$run,
-					$author$project$C$Parse$parseDef(env),
-					s)));
+				A2($elm$parser$Parser$run, $author$project$C$Parse$parseCommand, s)));
 	});
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $author$project$Main$sendDot = _Platform_outgoingPort('sendDot', $elm$json$Json$Encode$string);
@@ -7175,16 +7739,6 @@ var $elm_community$intdict$IntDict$insert = F3(
 				$elm$core$Maybe$Just(value)),
 			dict);
 	});
-var $elm$core$Maybe$map = F2(
-	function (f, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return $elm$core$Maybe$Just(
-				f(value));
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
 var $elm_community$intdict$IntDict$get = F2(
 	function (key, dict) {
 		get:
@@ -7287,7 +7841,7 @@ var $author$project$C$Env$toGraphDot = function (env) {
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		if (msg.$ === 'AddVar') {
-			var res = A2($author$project$C$Eval$elabDefStr, model.env, model.varString);
+			var res = A2($author$project$C$Eval$runCommandStr, model.env, model.varString);
 			if (res.$ === 'Ok') {
 				var env_ = res.a;
 				return _Utils_Tuple2(

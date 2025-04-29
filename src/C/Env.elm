@@ -1,4 +1,4 @@
-module C.Env exposing (Env, emptyEnv, insert, lookupAddr, lookupType, lookupValue, toGraphDot, view)
+module C.Env exposing (Env, emptyEnv, insert, lookupAddr, lookupType, lookupValue, lookupValueAtAddr, toGraphDot, updateAtAddr, view)
 
 import C.Type exposing (Type)
 import C.Val exposing (Val)
@@ -8,6 +8,7 @@ import Graph.DOT as GDOT
 import Html exposing (..)
 import Html.Attributes exposing (hidden)
 import List as L
+import Maybe as M
 import Result as R
 import String as S
 
@@ -109,6 +110,15 @@ insert env t n v =
                 }
 
 
+updateAtAddr : Env -> Int -> Val -> Result String Env
+updateAtAddr env a v =
+    if D.member a env.store then
+        Ok { env | store = D.update a (M.map (always v)) env.store }
+
+    else
+        Err <| "address " ++ S.fromInt a ++ " is not in use"
+
+
 lookupType : Env -> String -> Result String Type
 lookupType env name =
     D.get name env.types
@@ -128,6 +138,11 @@ lookupValue env name =
     lookupAddr env name
         |> Result.andThen
             (\addr -> D.get addr env.store |> Result.fromMaybe "")
+
+
+lookupValueAtAddr : Env -> Int -> Result String Val
+lookupValueAtAddr env a =
+    D.get a env.store |> Result.fromMaybe ""
 
 
 view : Env -> Html msg
