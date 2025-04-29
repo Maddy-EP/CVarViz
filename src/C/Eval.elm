@@ -4,6 +4,7 @@ import C.Def exposing (Def)
 import C.Env exposing (Env)
 import C.Exp exposing (Exp(..))
 import C.Parse as CP
+import C.Stmt exposing (LValue(..), Stmt(..))
 import C.Type exposing (Type(..))
 import C.Val exposing (Val(..))
 import Dict as D
@@ -50,6 +51,42 @@ elabDefStr env s =
     run CP.parseDef s
         |> R.mapError PE.deadEndsToString
         |> R.andThen (elabDef env)
+addrOfLValue : Env -> LValue -> Result String Int
+addrOfLValue env lv =
+    case lv of
+        LVar n ->
+            C.Env.lookupAddr env n
+
+        LDeref lv_ ->
+            case addrOfLValue env lv_ |> R.andThen (\a -> C.Env.lookupValueAtAddr env a) |> R.toMaybe of
+                Nothing ->
+                    Err "could not resolve lvalue to a value"
+
+                Just (P Nothing) ->
+                    Err "lvalue cannot be null"
+
+                Just (P (Just i)) ->
+                    Ok i
+
+                Just (I _) ->
+                    Err "lvalue cannot be a plain integer"
+
+
+runStmt : Env -> Stmt -> Result String Env
+runStmt env s =
+    case s of
+        Assign lv e ->
+            lvalueType env lv
+                |> R.andThen
+                    (\t ->
+                        typecheck env t e
+                            |> R.andThen (\_ -> evalExp env e)
+                            |> R.andThen
+                                (\v ->
+                                    addrOfLValue env lv
+                                        |> R.andThen (\a -> C.Env.updateAtAddr env a v)
+                                )
+                    )
 
 
 elabDef : Env -> Def -> Result String Env
@@ -57,6 +94,35 @@ elabDef env d =
     typecheck env d.typ d.rhs
         |> R.andThen (\_ -> evalExp env d.rhs)
         |> R.andThen (\v -> C.Env.insert env d.typ d.name v)
+
+
+lvalueName : LValue -> String
+lvalueName lv =
+    case lv of
+        LVar s ->
+            s
+
+        LDeref lv_ ->
+            lvalueName lv_
+
+
+lvalueType : Env -> LValue -> Result String Type
+lvalueType env lv =
+    case lv of
+        LVar n ->
+            C.Env.lookupType env n
+
+        LDeref lv_ ->
+            lvalueType env lv_
+                |> R.andThen
+                    (\t ->
+                        case t of
+                            PointerT t_ ->
+                                Ok t_
+
+                            IntT ->
+                                Err "type error: cannot dereference an lvalue of integer type"
+                    )
 
 
 typecheck : Env -> Type -> Exp -> Result String ()
