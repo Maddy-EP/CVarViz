@@ -1,5 +1,6 @@
-module C.Parse exposing (parseDef)
+module C.Parse exposing (parseCommand)
 
+import C.Command exposing (Command(..))
 import C.Def exposing (Def)
 import C.Env exposing (Env)
 import C.Exp exposing (Exp(..))
@@ -39,7 +40,6 @@ parseVarName =
 parseDef : Parser Def
 parseDef =
     succeed Def
-        |. spaces
         |= parseType
         |. spaces
         |= parseVarName
@@ -88,3 +88,14 @@ parseStmt =
         |= parseExp
         |. spaces
         |. symbol ";"
+
+
+parseCommand : Parser Command
+parseCommand =
+    succeed identity
+        |. spaces
+        |= oneOf
+            [ map CDef parseDef
+            , map CStmt parseStmt
+            ]
+        |. end

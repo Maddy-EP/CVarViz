@@ -1,5 +1,6 @@
-module C.Eval exposing (elabDefStr)
+module C.Eval exposing (runCommandStr)
 
+import C.Command exposing (Command(..))
 import C.Def exposing (Def)
 import C.Env exposing (Env)
 import C.Exp exposing (Exp(..))
@@ -11,6 +12,23 @@ import Dict as D
 import Parser exposing (..)
 import Parser.Extra as PE
 import Result as R
+
+
+runCommandStr : Env -> String -> Result String Env
+runCommandStr env s =
+    run CP.parseCommand s
+        |> R.mapError PE.deadEndsToString
+        |> R.andThen (runCommand env)
+
+
+runCommand : Env -> Command -> Result String Env
+runCommand env c =
+    case c of
+        CDef def ->
+            elabDef env def
+
+        CStmt stmt ->
+            runStmt env stmt
 
 
 evalExp : Env -> Exp -> Result String Val
@@ -46,11 +64,6 @@ evalExp env e =
                     )
 
 
-elabDefStr : Env -> String -> Result String Env
-elabDefStr env s =
-    run CP.parseDef s
-        |> R.mapError PE.deadEndsToString
-        |> R.andThen (elabDef env)
 addrOfLValue : Env -> LValue -> Result String Int
 addrOfLValue env lv =
     case lv of

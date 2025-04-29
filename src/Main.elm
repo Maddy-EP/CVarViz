@@ -59,7 +59,7 @@ update msg model =
         AddVar ->
             let
                 res =
-                    CEv.elabDefStr model.env model.varString
+                    CEv.runCommandStr model.env model.varString
             in
             case res of
                 Ok env_ ->
