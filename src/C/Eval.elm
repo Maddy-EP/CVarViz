@@ -12,8 +12,8 @@ import Parser.Extra as PE
 import Result as R
 
 
-eval : Env -> Exp -> Result String Val
-eval env e =
+evalExp : Env -> Exp -> Result String Val
+evalExp env e =
     case e of
         Null ->
             Ok (P Nothing)
@@ -29,7 +29,7 @@ eval env e =
                 |> R.map (P << Just)
 
         Deref e_ ->
-            eval env e_
+            evalExp env e_
                 |> R.andThen
                     (\v ->
                         case v of
@@ -55,7 +55,7 @@ elabDefStr env s =
 elabDef : Env -> Def -> Result String Env
 elabDef env d =
     typecheck env d.typ d.rhs
-        |> R.andThen (\_ -> eval env d.rhs)
+        |> R.andThen (\_ -> evalExp env d.rhs)
         |> R.andThen (\v -> C.Env.insert env d.typ d.name v)
 
 

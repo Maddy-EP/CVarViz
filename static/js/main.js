@@ -5508,7 +5508,7 @@ var $elm$core$Result$map = F2(
 			return $elm$core$Result$Err(e);
 		}
 	});
-var $author$project$C$Eval$eval = F2(
+var $author$project$C$Eval$evalExp = F2(
 	function (env, e) {
 		switch (e.$) {
 			case 'Null':
@@ -5547,7 +5547,7 @@ var $author$project$C$Eval$eval = F2(
 							return $elm$core$Result$Err('tried to dereference a plain integer');
 						}
 					},
-					A2($author$project$C$Eval$eval, env, e_));
+					A2($author$project$C$Eval$evalExp, env, e_));
 		}
 	});
 var $elm$core$Dict$Black = {$: 'Black'};
@@ -5775,7 +5775,7 @@ var $author$project$C$Eval$elabDef = F2(
 			A2(
 				$elm$core$Result$andThen,
 				function (_v0) {
-					return A2($author$project$C$Eval$eval, env, d.rhs);
+					return A2($author$project$C$Eval$evalExp, env, d.rhs);
 				},
 				A3($author$project$C$Eval$typecheck, env, d.typ, d.rhs)));
 	});
