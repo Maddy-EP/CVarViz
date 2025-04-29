@@ -47,7 +47,7 @@ evalExp env e =
 
 elabDefStr : Env -> String -> Result String Env
 elabDefStr env s =
-    run (CP.parseDef env) s
+    run CP.parseDef s
         |> R.mapError PE.deadEndsToString
         |> R.andThen (elabDef env)
 

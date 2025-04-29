@@ -35,8 +35,8 @@ parseVarName =
         }
 
 
-parseDef : Env -> Parser Def
-parseDef env =
+parseDef : Parser Def
+parseDef =
     succeed Def
         |. spaces
         |= parseType
@@ -45,15 +45,15 @@ parseDef env =
         |. spaces
         |. symbol "="
         |. spaces
-        |= parseExp env
+        |= parseExp
         |. spaces
         |. symbol ";"
         |. spaces
         |. end
 
 
-parseExp : Env -> Parser Exp
-parseExp env =
+parseExp : Parser Exp
+parseExp =
     oneOf
         [ map Lit int
         , map (always Null) (keyword "null")
@@ -62,7 +62,7 @@ parseExp env =
             |= parseVarName
         , succeed Deref
             |. symbol "*"
-            |= lazy (\_ -> parseExp env)
+            |= lazy (\_ -> parseExp)
         , succeed Var
             |= parseVarName
         ]
