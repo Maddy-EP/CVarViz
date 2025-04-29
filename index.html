@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html>
+<html color-mode="user">
   <head>
     <link rel="stylesheet" href="static/css/mvp.css">
 
@@ -20,16 +20,216 @@
     <main>
       <hr>
       <article>
-        <h2>Getting Started</h2>
+        <h2>Pointer Primer</h2>
+        <h3>Introduction</h3>
         <p>
-          This tool helps you visualize what is going on at a snapshot in time
-          in a C program -- specifically in terms of the defined variables, and
-          how they relate to one another via pointers.
+          If you come from a language like Python, C#, or Java, you are used to
+          <i>garbage collection</i>: An automatic process by which the dynamic
+          memory your program requests from the operating system is periodically
+          returned to the system by carefully determining what isn't accessible
+          or in-use anymore.
         </p>
         <p>
-          Currently, there is only support for <code>int</code> definitions, and
-          arbitrarily-indirect pointers to the same (e.g.
-          <code>int *</code>, <code>int **</code>, etc.)
+          But what if you're working on a video game, embedded software for a
+          low-spec device, or performance-critical cryptography?
+          Is garbage collection good enough?
+        </p>
+        <p>
+          Usually, no: Garbage collection makes program performance
+          significantly less predictable, can have pathological behavior in some
+          cases, and is simply an increase to your language's runtime system
+          that you likely can't afford in settings where speed/efficient use of
+          memory is crucial.
+        </p>
+        <p>
+          Some of the earliest programming languages, including C, were designed
+          to provide a lower level of access to your computer hardware -- without
+          requiring you to learn complex instruction set architectures (it's
+          rare, especially these days, to encounter a system that doesn't have a
+          C compiler to make programming more palatable).
+        </p>
+        <p>
+          With great power comes great responsibility, however.
+          To interact with your machine at such a low level, you must take on
+          the role of the garbage collector: If you ask for memory, you are
+          responsible for cleaning it up when you're done.
+          If you lose track of some memory you asked for, your program will
+          'leak' it (that is, hold on to it even if no longer needed, making it
+          harder in the long term for other software to request memory of its
+          own).
+          If you forget you've released memory back to the system and try to
+          release it a second time, your program will crash with an unhelpful
+          "double-free" error.
+          And, arguably worse than that, if you <i>think</i> some memory is
+          valid / accessible to your program, but it's actually not, you may
+          encounter the dreaded "Segmentation fault".
+        </p>
+        <p>
+          And all of this isn't to mention the myriad ways low-level controls
+          make it harder to write software that is secure: Some very common
+          functions in the C standard library (and I
+          mean <i>common</i>), if used, leave your software susceptible to a
+          number of the most common exploits possible.
+        </p>
+        <p>
+          If none of these concepts are familiar, that's OK!
+          This primer will hopefully help, and the visualization tool is
+          intended to be a quick way to experiment with creating variables
+          (especially pointer variables) and see how they can be used to
+          perform "action at a distance" on other variables.
+          The goal is to walk away with a better understanding of pointers, and
+          have a relatively quick way to experiment with the basics.
+        </p>
+        <h3>What is memory?</h3>
+        <p>
+          To greatly oversimplify, modern computers consist of three general
+          (classes of) components:
+        </p>
+        <ul>
+          <li>CPUs</li>
+          <li>Random-access memory (RAM)</li>
+          <li>I/O devices (hard drives, monitors, keyboards, GPUs, etc.)</li>
+        </ul>
+        <p>
+          The CPU is the 'brains', executing the instructions your computer is
+          built to understand (its <i>instruction set architecture</i>).
+          These instructions typically involve arithmetic, reading and writing
+          memory, and jumping to other instructions based on certain conditions
+          (meaning it is possible to do more interesting things than execute a
+          precise series of instructions in order).
+        </p>
+        <p>
+          RAM is fast, random-access (meaning you can read/write to anywhere),
+          short-term storage: It's what your programs use to store the data they
+          are actively working with.
+          A common way to think about it is as a bunch of boxes organized
+          into a straight line, numbered starting from 0.
+          These numbers are the memory <i>addresses</i>, and at each address
+          there may be a value.
+        </p>
+        <p>
+          'Short-term' here just means that RAM will not persist after it loses
+          power, unlike a hard disk or SSD.
+          This is one of the trade-offs made to have RAM perform extremely well
+          when it comes to read and write times.
+        </p>
+        <p>
+          A common way to think about memory is as a bunch of boxes organized
+          into a straight line, numbered starting from 0.
+          We call these numbers the <i>addresses</i> of the memory cells that
+          they correspond to, and it is through these addresses that we achieve
+          random-access when reading and writing data; at each address, we can
+          store a <i>value</i>.
+        </p>
+        <h3>What is a pointer?</h3>
+        <p>
+          With that crash-course on the basics of memory out of the way, this is
+          an easy question to answer!
+          To repeat the mantra of my introductory computer science course (that
+          was also a question on both the midterm <i>and</i> final exams):
+        </p>
+        <blockquote>
+          "A pointer is a memory address."
+        </blockquote>
+        <p>
+          That's really it!
+        </p>
+        <h3>Pointers in C</h3>
+        <p>
+          But how do we use pointers in C?
+          When we write a simple C definition, such as:
+        </p>
+        <pre>
+          <code>
+int x = 17;
+          </code>
+        </pre>
+        <p>
+          This associates the name <code>x</code> with a memory address, and
+          stores the value <code>0</code> at that address.
+          The type <code>int</code> tells C that the value we are storing at the
+          address associated with <code>x</code> is an integer (this is
+          important to know what operations are permissible and how much memory
+          is necessary to store the value).
+        </p>
+        <p>
+          One of the greatest confusions with pointers is conflating the address
+          and value associated with a variable.
+          To help combat this, you can think of the variable name and address as
+          being in one-to-one correspondence, and the variable names and values
+          as being in a many-to-one correspondence (there is nothing wrong with
+          multiple variables having the same value, but it's impossible for two
+          distinct variables to have the same address).
+        </p>
+        <p>
+          C provides an operator to get the address associated with a variable
+          name, known as the "address-of" operator.
+          For example, the address of the variable <code>x</code> defined above
+          is computed by writing <code>&x</code>.
+        </p>
+        <p>
+          What type of data is <code>&x</code>, though?
+          Since it's a memory address, it's a pointer!
+          But how do we write the type of a pointer in C, so we can create
+          variables capable of storing pointer values like <code>&x</code>?
+        </p>
+        <p>
+          Enter one of the most frustrating parts of C's syntax: Pointer types.
+          If <code>T</code> is a C type (such as <code>int</code>), then <code>T
+          *</code> is the type of addresses of <code>T</code>-valued variables.
+        </p>
+        <p>
+          Where this gets fun is, you can keep adding <code>*</code>, so you can
+          store address of <code>T *</code>-valued variables!
+          Before getting ahead of ourselves, though, this is what it looks like
+          to store the address of <code>x</code> in another variable:
+        </p>
+        <pre>
+          <code>
+int *y = &x;
+          </code>
+        </pre>
+        <p>
+          This says that <code>y</code> is a variable of type <code>int *</code>
+          (that is, a pointer to an integer), whose value is the address
+          associated with the variable <code>x</code>.
+        </p>
+        <p>
+          If we try to use the value of <code>y</code> directly, we'll be trying
+          to use a pointer value - while this is just some kind of integer in
+          this basic presentation, this typically isn't allowed.
+          Fortunately, since we know the address of something, we should be able
+          to look it up: Enter the dereference operator!
+        </p>
+        <pre>
+          <code>
+int z = *y;
+          </code>
+        </pre>
+        <p>
+          Here, we are defining a variable <code>z</code> of
+          type <code>int</code> whose value is the value <i>at the address which
+            is the value of <code>y</code></i>.
+          What is it's value?
+          Well, if <code>y</code> is the address of <code>x</code>,
+          then <code>*y</code> is the value at that address - in other words,
+          the value of <code>x</code>.
+        </p>
+        <p>
+          If your head is spinning, never fear - this is <i>precisely</i> where
+          the visualizer at the bottom of this page comes in handy.
+        </p>
+        <h2>Getting Started With CVarViz</h2>
+        <p>
+          CVarViz understands two kinds of inputs: Definitions, and assignment
+          statements.
+          The former adds or directly updates variables in the environment, and
+          the latter allows existing variables to be updated (directly <i>or</i>
+          indirectly through pointers).
+        </p>
+        <p>
+          To keep things simple, you can only define variables of
+          type <code>int</code> (and the pointer types derived from this type).
         </p>
         <p>
           The following can be used to define new variables:
@@ -41,29 +241,10 @@
           <li>Address-of operations (e.g. <code>&x</code>)</li>
           <li>Dereference operations (e.g. <code>*x</code>)</li>
         </ul>
-        <h2>Limitations</h2>
         <p>
-          The tool is severely limited for the time being; only <code>int</code>
-          and its derived pointer types are supported, there are no dynamic
-          analyses to visualize how the points-to graph changes over time in a
-          real program, and you have to input your definitions / updates one at
-          a time.
+          And when writing assignments to update variables, you can use
+          variables (or dereferenced variables) as the left-hand sides.
         </p>
-        <p>
-          Ultimately, I would love for this to allow "stepping through" simple C
-          programs so the points-to graph can be updated to show memory behavior
-          over time (this can help demystify tricky functions that do a
-          significant amount of pointer arithmetic / memory management).
-        </p>
-        <h2>Important Notes</h2>
-        <ul>
-          <li>Redefining a variable effectively reassigns the value; the
-            address is unaffected.</li>
-          <li>Variables cannot currently be deleted; this is a high-priority
-            update coming soon!</li>
-          <li>There's no way to save your work! To clear the environment,
-            simply refresh the page.</li>
-        </ul>
       </article>
       <hr>
       <div id="myapp"></div>
